@@ -39,14 +39,12 @@ it will create :
 
 <img src="./docs/images/first-tree.png" height=60%>
 
-the error is only for json errors.
-
 If you want to programmaticaly build your tree, you can also use the CreateTree Method.
 
 ```golang
 var myTree []Tree
 // append your nodes on myTree and then
-tree :=dtree.LoadTree([]byte(jsonTree))
+tree :=dtree.CreateTree(myTree)
 ```
 
 Then we can resolve the decision Tree by passing another json, representing the needed value.  
@@ -89,7 +87,8 @@ This one was a simple decision Tree. You can build more complexe with more nodes
 |lte (or <=)| lte (for string, numbers) |
 |contains| does the string (defined on the value of the Tree) is contained on the json request |
 |count|  count (only for arrays) |
-|regexp| do a regecp (only for string) |
+|regexp| do a regexp (only for string) |
+|percent (or %) | do a random selection based on percentages |
 
 You can also define your own operators 
 
