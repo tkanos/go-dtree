@@ -314,11 +314,11 @@ func regex(v1 interface{}, v2 *Tree) (*Tree, error) {
 
 // percentage rolls the dice, to know if it falls on one of the bucket of the percents node.
 func percentage(v1 interface{}, v2 *Tree) (*Tree, error) {
-	if v2.Parent == nil {
+	if v2.GetParent() == nil {
 		return nil, ErrNoParentNode
 	}
 
-	brothersNode := v2.Parent.GetChild()
+	brothersNode := v2.GetParent().GetChild()
 
 	if brothersNode == nil || len(brothersNode) == 1 {
 		return v2, nil

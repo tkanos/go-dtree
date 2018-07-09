@@ -14,7 +14,7 @@ type TreeOptions struct {
 // Tree represent a Tree
 type Tree struct {
 	nodes    []*Tree
-	Parent   *Tree
+	parent   *Tree
 	ID       int         `json:"id"`
 	Name     string      `json:"name"`
 	ParentID int         `json:"parent_id"`
@@ -46,7 +46,7 @@ func (o byOrder) Less(i, j int) bool {
 
 // AddNode Add a new Node (leaf) to the Tree
 func (t *Tree) AddNode(node *Tree) {
-	node.Parent = t
+	node.parent = t
 	t.nodes = append(t.nodes, node)
 	sort.Sort(byOrder(t.nodes))
 }
@@ -54,6 +54,11 @@ func (t *Tree) AddNode(node *Tree) {
 // GetChild get the nodes child of this one
 func (t *Tree) GetChild() []*Tree {
 	return t.nodes
+}
+
+// GetParent get the parent node of this one
+func (t *Tree) GetParent() *Tree {
+	return t.parent
 }
 
 // Next evaluate which will be the next Node according to the jsonRequest
