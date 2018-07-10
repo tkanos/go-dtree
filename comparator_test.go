@@ -637,7 +637,6 @@ func TestEq(t *testing.T) {
 }
 
 var comparett = []struct {
-	v1      interface{}
 	op      string
 	v2      *Tree
 	err     error
@@ -663,7 +662,7 @@ var comparett = []struct {
 func TestCompare(t *testing.T) {
 	for _, tt := range comparett {
 		// Act
-		result, err := compare(tt.v1, tt.op, tt.v2)
+		result, err := compare(nil, "", tt.op, tt.v2)
 
 		// Assert
 		assert.Equal(t, tt.err, err, tt.message)

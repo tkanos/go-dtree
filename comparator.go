@@ -26,7 +26,7 @@ var ErrNoNode = errors.New("Node is nil")
 // ErrNoParentNode : Node has no parent
 var ErrNoParentNode = errors.New("Node has no parent")
 
-func compare(request interface{}, op string, treeValue *Tree, operators ...map[string]func(interface{}, *Tree) (*Tree, error)) (*Tree, error) {
+func compare(requests map[string]interface{}, requestKey string, op string, treeValue *Tree, operators ...map[string]func(requests map[string]interface{}, requestKey string, tree *Tree) (*Tree, error)) (*Tree, error) {
 
 	if treeValue == nil {
 		return nil, ErrNoNode
@@ -39,36 +39,36 @@ func compare(request interface{}, op string, treeValue *Tree, operators ...map[s
 	if operators != nil {
 		for _, operator := range operators {
 			if f, ok := operator[op]; ok {
-				return f(request, treeValue)
+				return f(requests, requestKey, treeValue)
 			}
 		}
 	}
 
 	switch op {
 	case "eq", "==":
-		return eq(request, treeValue)
+		return eq(requests[requestKey], treeValue)
 	case "ne", "!=":
-		b, err := eq(request, treeValue)
+		b, err := eq(requests[requestKey], treeValue)
 		if b == nil {
 			return treeValue, err
 		}
 		return nil, err
 	case "gt", ">":
-		return gt(request, treeValue)
+		return gt(requests[requestKey], treeValue)
 	case "lt", "<":
-		return lt(request, treeValue)
+		return lt(requests[requestKey], treeValue)
 	case "gte", ">=":
-		return gte(request, treeValue)
+		return gte(requests[requestKey], treeValue)
 	case "lte", "<=":
-		return lte(request, treeValue)
+		return lte(requests[requestKey], treeValue)
 	case "contains":
-		return contains(request, treeValue)
+		return contains(requests[requestKey], treeValue)
 	case "count":
-		return count(request, treeValue)
+		return count(requests[requestKey], treeValue)
 	case "regexp":
-		return regex(request, treeValue)
+		return regex(requests[requestKey], treeValue)
 	case "percent", "%":
-		return percentage(request, treeValue)
+		return percentage(requests[requestKey], treeValue)
 	default:
 		return nil, ErrOperator
 	}
