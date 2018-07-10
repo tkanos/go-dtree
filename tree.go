@@ -21,6 +21,7 @@ type Tree struct {
 	Value    interface{} `json:"value"`
 	Operator string      `json:"operator"`
 	Order    int         `json:"order"`
+	Content  interface{} `json:"content"`
 }
 
 type byOrder []*Tree
