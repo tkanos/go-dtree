@@ -1,4 +1,5 @@
 
+#NOT YET READY TO BE USED IN ALPHA (WORK IN PROGRESS)
 
 <img src="./docs/images/dtree-logo-name.png" height=251>
 
