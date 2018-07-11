@@ -11,55 +11,84 @@ func main() {
 	jsonTree := []byte(`[
 			{
 				"id": 1,
-				"name": "sayHello"
+				"name": "root"
 			},
 			{
 				"id": 2,
-				"name": "GoodBye",
 				"parent_id": 1,
+				"key": "sayHello",
 				"operator": "eq",
 				"value": false
 			},
 			{
 				"id": 3,
-				"name": "gender",
+				"name": "GoodBye",
+				"parent_id": 2,
+				"value": "fallback"
+			},
+			{
+				"id": 4,
 				"parent_id": 1,
+				"key": "sayHello",
 				"operator": "eq",
 				"value": true
 			},
 			{
-				"id": 4,
-				"name": "Hello Miss",
-				"parent_id": 3,
+				"id": 5,
+				"parent_id": 4,
+				"key": "gender",
 				"operator": "eq",
 				"value": "F"
 			},
 			{
-				"id": 5,
-				"name": "Hello",
-				"parent_id": 3,
+				"id": 6,
+				"name": "Hello Miss",
+				"parent_id": 5,
 				"value": "fallback"
 			},
 			{
-				"id": 6,
-				"name": "age",
-				"parent_id": 3,
+				"id": 7,
+				"parent_id": 4,
+				"value": "fallback"
+			},
+			{
+				"id": 8,
+				"name": "Hello",
+				"parent_id": 7,
+				"value": "fallback"
+			},
+			{
+				"id": 9,
+				"parent_id": 4,
+				"key": "gender",
 				"operator": "eq",
 				"value": "M"
 			},
 			{
-				"id": 7,
-				"name": "Hello Sir",
-				"parent_id": 6,
+				"id": 10,
+				"parent_id": 9,
+				"key": "age",
 				"operator": "gt",
 				"value": 60
 			},
 			{
-				"id": 8,
-				"name": "Hello dude",
-				"parent_id": 6,
+				"id": 11,
+				"parent_id": 10,
+				"name": "Hello Sir",
+				"value": "fallback"
+			},
+			{
+				"id": 12,
+				"parent_id": 9,
+				"key": "age",
 				"operator": "lte",
 				"value": 60
+			},
+			{
+				"id": 13,
+				"parent_id": 12,
+				"name": "Hello dude",
+				"value": "fallback"
 			}
 		]`)
 

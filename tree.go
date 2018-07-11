@@ -8,18 +8,20 @@ import (
 // TreeOptions allow to extend the comparator
 type TreeOptions struct {
 	StopIfConvertingError bool
-	Operators             map[string]func(requests map[string]interface{}, requestKey string, v2 *Tree) (*Tree, error)
+	Operators             map[string]func(requests map[string]interface{}, node *Tree) (*Tree, error)
 }
 
 // Tree represent a Tree
 type Tree struct {
-	nodes    []*Tree
-	parent   *Tree
+	nodes  []*Tree
+	parent *Tree
+
 	ID       int         `json:"id"`
 	Name     string      `json:"name"`
 	ParentID int         `json:"parent_id"`
 	Value    interface{} `json:"value"`
 	Operator string      `json:"operator"`
+	Key      string      `json:"key"`
 	Order    int         `json:"order"`
 	Content  interface{} `json:"content"`
 }
@@ -66,12 +68,12 @@ func (t *Tree) GetParent() *Tree {
 func (t Tree) Next(jsonRequest map[string]interface{}, config *TreeOptions) (*Tree, error) {
 	for _, n := range t.nodes {
 		// build operators map
-		var operators map[string]func(requests map[string]interface{}, requestKey string, v2 *Tree) (*Tree, error)
+		var operators map[string]func(requests map[string]interface{}, node *Tree) (*Tree, error)
 		if config != nil {
 			operators = config.Operators
 		}
 
-		selected, err := compare(jsonRequest, t.Name, n.Operator, n, operators)
+		selected, err := compare(jsonRequest, n, operators)
 		if config.StopIfConvertingError == true && err != nil {
 			return n, err
 		}

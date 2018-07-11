@@ -11,42 +11,61 @@ import (
 var treeTest = []byte(`[
 	{
 		"id": 1,
-		"name": "isTest"
+		"name": "root"
 	},
 	{
 		"id": 2,
-		"name": "count",
 		"parent_id": 1,
+		"key": "isTest",
 		"operator": "eq",
-		"value": true
+		"value": false
+
 	},
 	{
 		"id": 3,
 		"name": "Never Reach",
-		"parent_id": 1,
-		"operator": "eq",
-		"value": false
+		"parent_id": 2,
+		"value": "fallback"
 	},
 	{
 		"id": 4,
-		"name": "FinalNode 2",
-		"parent_id": 2,
+		"parent_id": 1,
+		"key": "isTest",
+		"operator": "eq",
+		"value": true
+	},
+	{
+		"id": 5,
+		"parent_id": 4,
 		"operator": "gt",
+		"key": "count",
 		"value": 10,
 		"order":1
 	},
 	{
-		"id": 5,
-		"name": "FinalNode 1",
-		"parent_id": 2,
+		"id": 6,
+		"name": "FinalNode 2",
+		"parent_id": 5,
+		"value": "fallback"
+	},
+	{
+		"id": 7,
+		"parent_id": 4,
 		"operator": "lt",
+		"key": "count",
 		"value": 10,
 		"order":2
 	},
 	{
-		"id": 6,
+		"id": 8,
+		"name": "FinalNode 1",
+		"parent_id": 7,
+		"value": "fallback"
+	},
+	{
+		"id": 9,
 		"name": "FinalNode 3",
-		"parent_id": 2,
+		"parent_id": 4,
 		"value": "fallback"
 	}
 ]`)
@@ -95,10 +114,10 @@ func TestTree_SimpleTest_With_Error_Config(t *testing.T) {
 
 	//Act
 	result, err := tr.ResolveJSON(jsonRequest, f)
-
+	fmt.Println(result)
 	//Assert
 	assert.Error(t, err, "Resolve should not return an error when the type of the request is the not the same as the one defined on tree")
-	assert.Equal(t, "count", result.Name)
+	assert.Equal(t, "isTest", result.Key)
 }
 
 func TestTree_SimpleTest_Without_Error_Config(t *testing.T) {
@@ -159,55 +178,84 @@ func ExampleLoadTree() {
 	jsonTree := []byte(`[
 		{
 			"id": 1,
-			"name": "sayHello"
+			"name": "root"
 		},
 		{
 			"id": 2,
-			"name": "GoodBye",
 			"parent_id": 1,
+			"key": "sayHello",
 			"operator": "eq",
 			"value": false
 		},
 		{
 			"id": 3,
-			"name": "gender",
+			"name": "GoodBye",
+			"parent_id": 2,
+			"value": "fallback"
+		},
+		{
+			"id": 4,
 			"parent_id": 1,
+			"key": "sayHello",
 			"operator": "eq",
 			"value": true
 		},
 		{
-			"id": 4,
-			"name": "Hello Miss",
-			"parent_id": 3,
+			"id": 5,
+			"parent_id": 4,
+			"key": "gender",
 			"operator": "eq",
 			"value": "F"
 		},
 		{
-			"id": 5,
-			"name": "Hello",
-			"parent_id": 3,
+			"id": 6,
+			"name": "Hello Miss",
+			"parent_id": 5,
 			"value": "fallback"
 		},
 		{
-			"id": 6,
-			"name": "age",
-			"parent_id": 3,
+			"id": 7,
+			"parent_id": 4,
+			"value": "fallback"
+		},
+		{
+			"id": 8,
+			"name": "Hello",
+			"parent_id": 7,
+			"value": "fallback"
+		},
+		{
+			"id": 9,
+			"parent_id": 4,
+			"key": "gender",
 			"operator": "eq",
 			"value": "M"
 		},
 		{
-			"id": 7,
-			"name": "Hello Sir",
-			"parent_id": 6,
+			"id": 10,
+			"parent_id": 9,
+			"key": "age",
 			"operator": "gt",
 			"value": 60
 		},
 		{
-			"id": 8,
-			"name": "Hello dude",
-			"parent_id": 6,
+			"id": 11,
+			"parent_id": 10,
+			"name": "Hello Sir",
+			"value": "fallback"
+		},
+		{
+			"id": 12,
+			"parent_id": 9,
+			"key": "age",
 			"operator": "lte",
 			"value": 60
+		},
+		{
+			"id": 13,
+			"parent_id": 12,
+			"name": "Hello dude",
+			"value": "fallback"
 		}
 	]`)
 

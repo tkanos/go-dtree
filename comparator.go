@@ -26,49 +26,49 @@ var ErrNoNode = errors.New("Node is nil")
 // ErrNoParentNode : Node has no parent
 var ErrNoParentNode = errors.New("Node has no parent")
 
-func compare(requests map[string]interface{}, requestKey string, op string, treeValue *Tree, operators ...map[string]func(requests map[string]interface{}, requestKey string, tree *Tree) (*Tree, error)) (*Tree, error) {
+func compare(requests map[string]interface{}, node *Tree, operators ...map[string]func(requests map[string]interface{}, node *Tree) (*Tree, error)) (*Tree, error) {
 
-	if treeValue == nil {
+	if node == nil {
 		return nil, ErrNoNode
 	}
 	// Check if it is a fallback value
-	if v, ok := treeValue.Value.(string); ok && v == FallbackType {
-		return treeValue, nil
+	if v, ok := node.Value.(string); ok && v == FallbackType {
+		return node, nil
 	}
 
 	if operators != nil {
 		for _, operator := range operators {
-			if f, ok := operator[op]; ok {
-				return f(requests, requestKey, treeValue)
+			if f, ok := operator[node.Operator]; ok {
+				return f(requests, node)
 			}
 		}
 	}
 
-	switch op {
+	switch node.Operator {
 	case "eq", "==":
-		return eq(requests[requestKey], treeValue)
+		return eq(requests[node.Key], node)
 	case "ne", "!=":
-		b, err := eq(requests[requestKey], treeValue)
+		b, err := eq(requests[node.Key], node)
 		if b == nil {
-			return treeValue, err
+			return node, err
 		}
 		return nil, err
 	case "gt", ">":
-		return gt(requests[requestKey], treeValue)
+		return gt(requests[node.Key], node)
 	case "lt", "<":
-		return lt(requests[requestKey], treeValue)
+		return lt(requests[node.Key], node)
 	case "gte", ">=":
-		return gte(requests[requestKey], treeValue)
+		return gte(requests[node.Key], node)
 	case "lte", "<=":
-		return lte(requests[requestKey], treeValue)
+		return lte(requests[node.Key], node)
 	case "contains":
-		return contains(requests[requestKey], treeValue)
+		return contains(requests[node.Key], node)
 	case "count":
-		return count(requests[requestKey], treeValue)
+		return count(requests[node.Key], node)
 	case "regexp":
-		return regex(requests[requestKey], treeValue)
+		return regex(requests[node.Key], node)
 	case "percent", "%":
-		return percentage(requests[requestKey], treeValue)
+		return percentage(requests[node.Key], node)
 	default:
 		return nil, ErrOperator
 	}
@@ -135,6 +135,30 @@ func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 				}
 			case string:
 				if t2, ok := v2.Value.(string); ok {
+					if tv == t2 {
+						return v2, nil
+					}
+				}
+			}
+		}
+		return nil, nil
+	case []string:
+		for _, v := range v1.([]interface{}) {
+			switch tv := v.(type) {
+			case string:
+				if t2, ok := v2.Value.(string); ok {
+					if tv == t2 {
+						return v2, nil
+					}
+				}
+			}
+		}
+		return nil, nil
+	case []float64:
+		for _, v := range v1.([]interface{}) {
+			switch tv := v.(type) {
+			case float64:
+				if t2, ok := v2.Value.(float64); ok {
 					if tv == t2 {
 						return v2, nil
 					}
