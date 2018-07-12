@@ -11,21 +11,33 @@ DTree allow you to define an Decision Tree in json
 ```json
 {
 				"id": 1,
-				"name": "isFirstTree"
+				"name": "Root"
 			},
 			{
 				"id": 2,
-				"name": "Welcome",
-				"parent_id": 1,
+				"name": "IsFirstTree",
+                "parent_id": 1,
+                "key":"isFirstTree",
 				"operator": "eq",
 				"value": true
 			},
 			{
 				"id": 3,
-				"name": "Congrats",
-				"parent_id": 1,
+				"name": "IsNotTheFirstTree",
+                "parent_id": 1,
+                "key":"isFirstTree",
 				"operator": "eq",
 				"value": false
+            },
+            {
+				"id": 4,
+				"name": "Welcome",
+                "parent_id": 2,
+            },
+            {
+				"id": 5,
+				"name": "Congrats",
+                "parent_id": 3,
 			}
 
 ```
@@ -99,8 +111,9 @@ You can define your own custom operators (on the example I do a len of an array 
 
 ```golang
 f := func(t *TreeOptions) {
-    t.Operators = make(map[string]func(v1 interface{}, v2 *dtree.Tree) (bool, error))
-    t.Operators["len"] = func(v1 interface{}, v2 *dtree.Tree) (bool, error) {
+    t.Operators = make(map[string]dtree.Operator)
+    t.Operators["len"] = func(requests map[string]interface{}, node *Tree) (*Tree, error) {
+        if v1, ok := requests[node.Key]; ok {
             switch t1 := v1.(type) {
             case []interface{}:
                 if t2, ok := v2.Value.(float64); ok {
@@ -110,11 +123,12 @@ f := func(t *TreeOptions) {
                     return nil, nil
                 }
 
-                return nil, dtree.ErrBadType
+                return nil, ErrBadType
             default:
-                return nil, dtree.ErrNotSupportedType
+                return nil, ErrNotSupportedType
             }
         }
+        return nil, nil
     }
 }
 ```
@@ -131,7 +145,7 @@ f := func(t *TreeOptions) {
 }
 ```
 
-We can also define a fallback value. It means on this case, that if all others path are in false, it go to this one.
+We can also define a fallback value. It means on this case, that if all others path are in false, it goes to this one.
 
 ```json
 "value": "fallback"
@@ -142,6 +156,8 @@ We can also set an order, to define the order of the evaluation (but of course f
 ```json
 "order": "1"
 ```
+
+The Node Tree as a parameter content, it's a interface{}, that allow you to put whatever you want.
 
 
 

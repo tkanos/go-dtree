@@ -31,8 +31,9 @@ func compare(requests map[string]interface{}, node *Tree, operators ...map[strin
 	if node == nil {
 		return nil, ErrNoNode
 	}
+
 	// Check if it is a fallback value
-	if v, ok := node.Value.(string); ok && v == FallbackType {
+	if v, ok := node.Value.(string); (ok && v == FallbackType) || len(node.Operator) == 0 {
 		return node, nil
 	}
 

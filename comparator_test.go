@@ -650,9 +650,8 @@ var comparett = []struct {
 		err:     nil,
 	},
 	{
-		v2:      &Tree{Value: 123},
+		v2:      &Tree{Value: 123, Operator: "abc"},
 		message: "Compare should always return false, when the operator is not supported",
-		op:      "abc",
 		result:  false,
 		err:     ErrOperator,
 	},

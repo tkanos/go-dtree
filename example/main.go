@@ -18,48 +18,45 @@ func main() {
 				"parent_id": 1,
 				"key": "sayHello",
 				"operator": "eq",
-				"value": false
-			},
-			{
-				"id": 3,
-				"name": "GoodBye",
-				"parent_id": 2,
-				"value": "fallback"
-			},
-			{
-				"id": 4,
-				"parent_id": 1,
-				"key": "sayHello",
-				"operator": "eq",
 				"value": true
 			},
 			{
+				"id": 3,
+				"parent_id": 1,
+				"key": "sayHello",
+				"operator": "eq",
+				"value": false
+			},
+			{
+				"id": 4,
+				"parent_id": 3,
+				"Name": "Goodbye"
+			},
+			{
 				"id": 5,
-				"parent_id": 4,
+				"parent_id": 2,
 				"key": "gender",
 				"operator": "eq",
 				"value": "F"
 			},
 			{
 				"id": 6,
-				"name": "Hello Miss",
 				"parent_id": 5,
-				"value": "fallback"
+				"Name": "Hello Miss"
 			},
 			{
 				"id": 7,
-				"parent_id": 4,
+				"parent_id": 2,
 				"value": "fallback"
 			},
 			{
 				"id": 8,
-				"name": "Hello",
 				"parent_id": 7,
-				"value": "fallback"
+				"Name": "Hello"
 			},
 			{
 				"id": 9,
-				"parent_id": 4,
+				"parent_id": 2,
 				"key": "gender",
 				"operator": "eq",
 				"value": "M"
@@ -74,8 +71,7 @@ func main() {
 			{
 				"id": 11,
 				"parent_id": 10,
-				"name": "Hello Sir",
-				"value": "fallback"
+				"Name": "Hello Sir"
 			},
 			{
 				"id": 12,
@@ -87,8 +83,7 @@ func main() {
 			{
 				"id": 13,
 				"parent_id": 12,
-				"name": "Hello dude",
-				"value": "fallback"
+				"Name": "Hello dude"
 			}
 		]`)
 
