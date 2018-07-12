@@ -1,5 +1,5 @@
 
-#NOT YET READY TO BE USED IN ALPHA (WORK IN PROGRESS)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tkanos/go-dtree)](https://goreportcard.com/report/github.com/tkanos/go-dtree)
 
 <img src="./docs/images/dtree-logo-name.png" height=251>
 
