@@ -1,4 +1,5 @@
 
+[![CircleCI](https://circleci.com/gh/tkanos/go-dtree.svg?style=svg)](https://circleci.com/gh/tkanos/go-dtree)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tkanos/go-dtree)](https://goreportcard.com/report/github.com/tkanos/go-dtree)
 
 <img src="./docs/images/dtree-logo-name.png" height=251>
