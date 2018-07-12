@@ -1,4 +1,9 @@
-.IPHONE: test coverage
+.IPHONE: install test coverage
+
+install:
+	go get -u github.com/golang/dep/cmd/dep
+	go get -u golang.org/x/lint/golint
+	dep ensure
 
 test:
 	go test -race -v `go list ./... | grep -v -e /vendor/ -e /mock/`
