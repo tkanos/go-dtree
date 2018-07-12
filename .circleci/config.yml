@@ -3,7 +3,7 @@
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-  install:
+  lint:
     docker:
       # specify the version
       - image: circleci/golang:1.9
@@ -13,9 +13,9 @@ jobs:
       - checkout
 
       # specify any bash command here prefixed with `run: `
-      - run: go get -u github.com/golang/dep/cmd/dep
       - run: go get -u golang.org/x/lint/golint
-      - run: dep ensure
+      - run: go list ./... | grep -v /vendor/ | grep -v /cmd/ | grep -v /handler | xargs -L1 golint -set_exit_status
+      - run: go vet `go list ./... | grep -v /vendor/ | grep -v /cmd/`
   test:
     docker:
       # specify the version
@@ -26,14 +26,14 @@ jobs:
       - checkout
 
       # specify any bash command here prefixed with `run: `
+      - run: go get -u github.com/golang/dep/cmd/dep
+      - run: dep ensure
       - run: go test -race -v `go list ./... | grep -v -e /vendor/ -e /mock/`
-      - run: go list ./... | grep -v /vendor/ | grep -v /cmd/ | grep -v /handler | xargs -L1 golint -set_exit_status
-      - run: go vet `go list ./... | grep -v /vendor/ | grep -v /cmd/`
 workflows:
   version: 2
-  install_and_test:
+  test_and_lint:
     jobs:
-      - install
+      - lint
       - test:
           requires:
-            - install
+            - lint
