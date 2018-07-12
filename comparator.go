@@ -99,14 +99,14 @@ func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 	case string:
 		switch t2 := v2.Value.(type) {
 		case string:
-			if t1 == t2 {
+			if strings.ToLower(t1) == strings.ToLower(t2) {
 				return v2, nil
 			}
 			return nil, nil
 		case []interface{}:
 			for _, v := range t2 {
 				if t2, ok := v.(string); ok {
-					if t1 == t2 {
+					if strings.ToLower(t1) == strings.ToLower(t2) {
 						return v2, nil
 					}
 				}
@@ -135,7 +135,7 @@ func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 				}
 			case string:
 				if t2, ok := v2.Value.(string); ok {
-					if tv == t2 {
+					if strings.ToLower(tv) == strings.ToLower(t2) {
 						return v2, nil
 					}
 				}
@@ -147,7 +147,7 @@ func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 			switch tv := v.(type) {
 			case string:
 				if t2, ok := v2.Value.(string); ok {
-					if tv == t2 {
+					if strings.ToLower(tv) == strings.ToLower(t2) {
 						return v2, nil
 					}
 				}
