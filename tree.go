@@ -5,10 +5,13 @@ import (
 	"sort"
 )
 
+// Operator represent a function that will evaluate a node
+type Operator func(requests map[string]interface{}, node *Tree) (*Tree, error)
+
 // TreeOptions allow to extend the comparator
 type TreeOptions struct {
 	StopIfConvertingError bool
-	Operators             map[string]func(requests map[string]interface{}, node *Tree) (*Tree, error)
+	Operators             map[string]Operator
 }
 
 // Tree represent a Tree
@@ -68,7 +71,7 @@ func (t *Tree) GetParent() *Tree {
 func (t Tree) Next(jsonRequest map[string]interface{}, config *TreeOptions) (*Tree, error) {
 	for _, n := range t.nodes {
 		// build operators map
-		var operators map[string]func(requests map[string]interface{}, node *Tree) (*Tree, error)
+		var operators map[string]Operator
 		if config != nil {
 			operators = config.Operators
 		}

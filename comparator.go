@@ -20,13 +20,13 @@ var ErrBadType = errors.New("types are different")
 // ErrNotSupportedType : Type in request are not supported
 var ErrNotSupportedType = errors.New("type not supported")
 
-// ErrNoNode : No treeValue was sent
+// ErrNoNode : No Node was sent
 var ErrNoNode = errors.New("Node is nil")
 
 // ErrNoParentNode : Node has no parent
 var ErrNoParentNode = errors.New("Node has no parent")
 
-func compare(requests map[string]interface{}, node *Tree, operators ...map[string]func(requests map[string]interface{}, node *Tree) (*Tree, error)) (*Tree, error) {
+func compare(requests map[string]interface{}, node *Tree, operators ...map[string]Operator) (*Tree, error) {
 
 	if node == nil {
 		return nil, ErrNoNode
