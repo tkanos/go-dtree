@@ -27,8 +27,12 @@ jobs:
 
       # specify any bash command here prefixed with `run: `
       - run: go get -u github.com/golang/dep/cmd/dep
+      - run: go get github.com/mattn/goveralls
       - run: dep ensure
       - run: go test -race -v `go list ./... | grep -v -e /vendor/ -e /mock/`
+      - run: go test -v -cover -race -coverprofile=./coverage.out
+      - run: goveralls -coverprofile=./coverage.out -service=circle-ci -repotoken=$COVERALLS_REPO_TOKEN
+
 workflows:
   version: 2
   test_and_lint:

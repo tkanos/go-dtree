@@ -1,6 +1,7 @@
 
 [![CircleCI](https://circleci.com/gh/tkanos/go-dtree.svg?style=svg)](https://circleci.com/gh/tkanos/go-dtree)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tkanos/go-dtree)](https://goreportcard.com/report/github.com/tkanos/go-dtree)
+[![Coverage Status](https://coveralls.io/repos/github/tkanos/go-dtree/badge.svg?branch=master)](https://coveralls.io/github/tkanos/go-dtree?branch=master)
 
 <img src="./docs/images/dtree-logo-name.png" height=251>
 
