@@ -134,10 +134,28 @@ func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 						return v2, nil
 					}
 				}
+				if t2, ok := v2.Value.([]interface{}); ok {
+					for _, vs := range t2 {
+						if t2, ok := vs.(float64); ok {
+							if tv == t2 {
+								return v2, nil
+							}
+						}
+					}
+				}
 			case string:
 				if t2, ok := v2.Value.(string); ok {
 					if strings.ToLower(tv) == strings.ToLower(t2) {
 						return v2, nil
+					}
+				}
+				if t2, ok := v2.Value.([]interface{}); ok {
+					for _, vs := range t2 {
+						if t2, ok := vs.(string); ok {
+							if strings.ToLower(tv) == strings.ToLower(t2) {
+								return v2, nil
+							}
+						}
 					}
 				}
 			}
