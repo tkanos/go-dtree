@@ -118,9 +118,9 @@ f := func(t *TreeOptions) {
         if v1, ok := requests[node.Key]; ok {
             switch t1 := v1.(type) {
             case []interface{}:
-                if t2, ok := v2.Value.(float64); ok {
+                if t2, ok := node.Value.(float64); ok {
                     if len(t1) == int(t2) {
-                        return v2, nil
+                        return node, nil
                     }
                     return nil, nil
                 }
