@@ -92,18 +92,18 @@ but in this case be careful, to don't use int (not supported), only floats.
 This one was a simple decision Tree. You can build more complexe with more nodes, with others operators than only equal.
 
 ## Available Operators :
-|operator|description|
-|---|---|s
-|eq (or ==)| equality (for string, bool, numbers, arrays) |
-|ne (or !=)| not equal (for string, bool, numbers, arrays) |
-|gt (or >)| gt (for string, numbers) |
-|lt (or <)| lt (for string, numbers) |
-|gte (or >=)| gte (for string, numbers) |
-|lte (or <=)| lte (for string, numbers) |
-|contains| does the string (defined on the value of the Tree) is contained on the json request |
-|count|  count (only for arrays) |
-|regexp| do a regexp (only for string) |
-|percent (or %) | do a random selection based on percentages |
+| operator       | description                                                                         |
+| -------------- | ----------------------------------------------------------------------------------- |
+| eq (or ==)     | equality (for string, bool, numbers, arrays)                                        |
+| ne (or !=)     | not equal (for string, bool, numbers, arrays)                                       |
+| gt (or >)      | gt (for string, numbers)                                                            |
+| lt (or <)      | lt (for string, numbers)                                                            |
+| gte (or >=)    | gte (for string, numbers)                                                           |
+| lte (or <=)    | lte (for string, numbers)                                                           |
+| contains       | does the string (defined on the value of the Tree) is contained on the json request |
+| count          | count (only for arrays)                                                             |
+| regexp         | do a regexp (only for string)                                                       |
+| percent (or %) | do a random selection based on percentages                                          |
 
 You can also define your own operators 
 
