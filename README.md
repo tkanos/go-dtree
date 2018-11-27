@@ -173,8 +173,8 @@ v, _ := t.Resolve(request)
 sliceOfString := dtree.GetNodePathFromContext(t.Context())
 fmt.Println(sliceOfString)
 
-// sliceofstring contains is a slice where each string is a node on the format key value operator expectedvalue
-// example : productid 1234 gt 1230
+// sliceofstring contains is a slice where each string is a node on the format `id : key value operator expectedvalue`
+// example : 3 : productid 1234 gt 1230
 ```
 
 
