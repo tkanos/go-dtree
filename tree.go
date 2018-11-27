@@ -1,6 +1,7 @@
 package dtree
 
 import (
+	"context"
 	"encoding/json"
 	"sort"
 )
@@ -18,6 +19,8 @@ type TreeOptions struct {
 type Tree struct {
 	nodes  []*Tree
 	parent *Tree
+
+	ctx context.Context
 
 	ID       int         `json:"id"`
 	Name     string      `json:"name"`
@@ -67,8 +70,19 @@ func (t *Tree) GetParent() *Tree {
 	return t.parent
 }
 
+// WithContext returns a tree with a context
+func (t *Tree) WithContext(ctx context.Context) *Tree {
+	t.ctx = ctx
+	return t
+}
+
+// Context returns the context
+func (t *Tree) Context() context.Context {
+	return t.ctx
+}
+
 // Next evaluate which will be the next Node according to the jsonRequest
-func (t Tree) Next(jsonRequest map[string]interface{}, config *TreeOptions) (*Tree, error) {
+func (t *Tree) Next(jsonRequest map[string]interface{}, config *TreeOptions) (*Tree, error) {
 	for _, n := range t.nodes {
 		// build operators map
 		var operators map[string]Operator
@@ -82,6 +96,9 @@ func (t Tree) Next(jsonRequest map[string]interface{}, config *TreeOptions) (*Tr
 		}
 
 		if selected != nil {
+			if t.ctx != nil {
+				t.ctx = contextValue(t.ctx, n.ID, n.Key, jsonRequest[n.Key], n.Operator, n.Value)
+			}
 			return selected, nil
 		}
 	}

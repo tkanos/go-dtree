@@ -161,6 +161,20 @@ We can also set an order, to define the order of the evaluation (but of course f
 
 The Node Tree as a parameter content, it's a interface{}, that allow you to put whatever you want.
 
+## Context :
 
+You can give a context to the Tree, is mostly used for debugging, like this you will be able to know what are the path that your request takes inside the tree.
+
+```golang
+t.WithContext(context.Background())
+
+v, _ := t.Resolve(request)
+
+sliceOfString := dtree.GetNodePathFromContext(t.Context())
+fmt.Println(sliceOfString)
+
+// sliceofstring contains is a slice where each string is a node on the format key value operator expectedvalue
+// example : productid 1234 gt 1230
+```
 
 
