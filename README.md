@@ -107,6 +107,19 @@ This one was a simple decision Tree. You can build more complexe with more nodes
 
 You can also define your own operators 
 
+## string comparition
+
+All the strings are case compared (without ToLower before the comparition)
+
+```
+s1 == s2
+```
+
+if you are not sure about the data, and you want to do ToLower comparition, if you two choice:
+- Write your own operator
+- Lower your tree data and json request, before to call Resolve.
+
+
 ## Custom operators 
 
 You can define your own custom operators (on the example I do a len of an array pass on request, and i check if it matches the Value of the path of the node on the Tree (it is the code of the already implemented operator "count"))
