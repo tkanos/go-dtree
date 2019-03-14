@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+func init() {
+	rand.Seed(int64(time.Now().Nanosecond()))
+}
+
 // FallbackType the fallback value (by default = "fallback"), can be overrided
 var FallbackType = "fallback"
 
@@ -26,7 +30,7 @@ var ErrNoNode = errors.New("Node is nil")
 // ErrNoParentNode : Node has no parent
 var ErrNoParentNode = errors.New("Node has no parent")
 
-func compare(requests map[string]interface{}, node *Tree, operators ...map[string]Operator) (*Tree, error) {
+func compare(requests map[string]interface{}, jsonValue interface{}, node *Tree, config *TreeOptions) (*Tree, error) {
 
 	if node == nil {
 		return nil, ErrNoNode
@@ -37,41 +41,65 @@ func compare(requests map[string]interface{}, node *Tree, operators ...map[strin
 		return node, nil
 	}
 
-	if operators != nil {
-		for _, operator := range operators {
-			if f, ok := operator[node.Operator]; ok {
-				return f(requests, node)
-			}
+	// if the operators override an existing one defined on isExistingOperator, we check first the opeators else we do it in the default
+	if config != nil && config.OverrideExistingOperator {
+		if r, err := runOperators(requests, node, config); err != ErrOperator {
+			return r, err
 		}
 	}
 
 	switch node.Operator {
 	case "eq", "==":
-		return eq(requests[node.Key], node)
+		return eq(jsonValue, node)
 	case "ne", "!=":
-		b, err := eq(requests[node.Key], node)
+		b, err := eq(jsonValue, node)
 		if b == nil {
 			return node, err
 		}
 		return nil, err
 	case "gt", ">":
-		return gt(requests[node.Key], node)
+		return gt(jsonValue, node)
 	case "lt", "<":
-		return lt(requests[node.Key], node)
+		return lt(jsonValue, node)
 	case "gte", ">=":
-		return gte(requests[node.Key], node)
+		return gte(jsonValue, node)
 	case "lte", "<=":
-		return lte(requests[node.Key], node)
+		return lte(jsonValue, node)
 	case "contains":
-		return contains(requests[node.Key], node)
+		return contains(jsonValue, node)
 	case "count":
-		return count(requests[node.Key], node)
+		return count(jsonValue, node)
 	case "regexp":
-		return regex(requests[node.Key], node)
+		return regex(jsonValue, node)
 	case "percent", "%":
-		return percentage(requests[node.Key], node)
+		return percentage(jsonValue, node)
 	default:
+		if config != nil && config.OverrideExistingOperator == false {
+			if r, err := runOperators(requests, node, config); err != ErrOperator {
+				return r, err
+			}
+		}
 		return nil, ErrOperator
+	}
+}
+
+func runOperators(requests map[string]interface{}, node *Tree, config *TreeOptions) (*Tree, error) {
+	if config != nil && config.Operators != nil {
+		for k, f := range config.Operators {
+			if k == node.Operator {
+				return f(requests, node)
+			}
+		}
+	}
+	return nil, ErrOperator
+}
+
+func isExistingOperator(name string) bool {
+	switch name {
+	case "eq", "==", "ne", "!=", "gt", ">", "lt", "<", "gte", ">=", "lte", "<=", "contains", "count", "regexp", "percent", "%":
+		return true
+	default:
+		return false
 	}
 }
 
@@ -100,14 +128,14 @@ func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 	case string:
 		switch t2 := v2.Value.(type) {
 		case string:
-			if strings.ToLower(t1) == strings.ToLower(t2) {
+			if t1 == t2 {
 				return v2, nil
 			}
 			return nil, nil
 		case []interface{}:
 			for _, v := range t2 {
 				if t2, ok := v.(string); ok {
-					if strings.ToLower(t1) == strings.ToLower(t2) {
+					if t1 == t2 {
 						return v2, nil
 					}
 				}
@@ -145,14 +173,14 @@ func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 				}
 			case string:
 				if t2, ok := v2.Value.(string); ok {
-					if strings.ToLower(tv) == strings.ToLower(t2) {
+					if tv == t2 {
 						return v2, nil
 					}
 				}
 				if t2, ok := v2.Value.([]interface{}); ok {
 					for _, vs := range t2 {
 						if t2, ok := vs.(string); ok {
-							if strings.ToLower(tv) == strings.ToLower(t2) {
+							if tv == t2 {
 								return v2, nil
 							}
 						}
@@ -166,7 +194,7 @@ func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 			switch tv := v.(type) {
 			case string:
 				if t2, ok := v2.Value.(string); ok {
-					if strings.ToLower(tv) == strings.ToLower(t2) {
+					if tv == t2 {
 						return v2, nil
 					}
 				}
@@ -367,7 +395,6 @@ func percentage(v1 interface{}, v2 *Tree) (*Tree, error) {
 		return v2, nil
 	}
 	var fallbackNode *Tree
-	rand.Seed(int64(time.Now().Nanosecond()))
 	var percent = rand.Float64() * 100.0
 	var total float64
 

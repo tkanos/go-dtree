@@ -661,7 +661,7 @@ var comparett = []struct {
 func TestCompare(t *testing.T) {
 	for _, tt := range comparett {
 		// Act
-		result, err := compare(nil, tt.v2)
+		result, err := compare(nil, nil, tt.v2, nil)
 
 		// Assert
 		assert.Equal(t, tt.err, err, tt.message)

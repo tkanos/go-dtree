@@ -11,8 +11,9 @@ type Operator func(requests map[string]interface{}, node *Tree) (*Tree, error)
 
 // TreeOptions allow to extend the comparator
 type TreeOptions struct {
-	StopIfConvertingError bool
-	Operators             map[string]Operator
+	StopIfConvertingError    bool
+	Operators                map[string]Operator
+	OverrideExistingOperator bool
 }
 
 // Tree represent a Tree
@@ -83,21 +84,23 @@ func (t *Tree) Context() context.Context {
 
 // Next evaluate which will be the next Node according to the jsonRequest
 func (t *Tree) Next(jsonRequest map[string]interface{}, config *TreeOptions) (*Tree, error) {
+	var jsonValue interface{}
+	var oldName string
 	for _, n := range t.nodes {
-		// build operators map
-		var operators map[string]Operator
-		if config != nil {
-			operators = config.Operators
+
+		if oldName != n.Key {
+			jsonValue = jsonRequest[n.Key]
+			oldName = n.Key
 		}
 
-		selected, err := compare(jsonRequest, n, operators)
+		selected, err := compare(jsonRequest, jsonValue, n, config)
 		if config.StopIfConvertingError == true && err != nil {
 			return n, err
 		}
 
 		if selected != nil {
 			if t.ctx != nil {
-				t.ctx = contextValue(t.ctx, n.ID, n.Key, jsonRequest[n.Key], n.Operator, n.Value)
+				t.ctx = contextValue(t.ctx, n.ID, n.Key, jsonValue, n.Operator, n.Value)
 			}
 			return selected, nil
 		}
@@ -155,6 +158,15 @@ func (t *Tree) Resolve(request map[string]interface{}, options ...func(t *TreeOp
 
 	for _, option := range options {
 		option(config)
+	}
+
+	if len(config.Operators) > 0 {
+		for k := range config.Operators {
+			if isExistingOperator(k) {
+				config.OverrideExistingOperator = true
+				break
+			}
+		}
 	}
 
 	return t.resolve(request, config)
