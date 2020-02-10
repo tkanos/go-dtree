@@ -24,14 +24,15 @@ type Tree struct {
 
 	ctx context.Context
 
-	ID       int         `json:"id"`
-	Name     string      `json:"name"`
-	ParentID int         `json:"parent_id"`
-	Value    interface{} `json:"value"`
-	Operator string      `json:"operator"`
-	Key      string      `json:"key"`
-	Order    int         `json:"order"`
-	Content  interface{} `json:"content"`
+	ID       int                    `json:"id"`
+	Name     string                 `json:"name"`
+	ParentID int                    `json:"parent_id"`
+	Value    interface{}            `json:"value"`
+	Operator string                 `json:"operator"`
+	Key      string                 `json:"key"`
+	Order    int                    `json:"order"`
+	Content  interface{}            `json:"content"`
+	Headers  map[string]interface{} `json:"headers"`
 }
 
 type byOrder []*Tree
