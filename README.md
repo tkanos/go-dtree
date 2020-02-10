@@ -190,4 +190,21 @@ fmt.Println(sliceOfString)
 // example : 3 : productid 1234 gt 1230
 ```
 
+If the tree is Static. You may want to use the TreeOption config.
+```golang
+//or you can use the TreeOption
+f := func(t *TreeOptions) {
+    t.Context = context.Background()
+}
+
+v, _ :=t.Resolve(request, options)
+
+sliceOfString := dtree.GetNodePathFromContext(t.Context())
+fmt.Println(sliceOfString)
+
+// sliceofstring contains is a slice where each string is a node on the format `id : key value operator expectedvalue`
+// example : 3 : productid 1234 gt 1230
+```
+
+
 

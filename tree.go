@@ -14,6 +14,7 @@ type TreeOptions struct {
 	StopIfConvertingError    bool
 	Operators                map[string]Operator
 	OverrideExistingOperator bool
+	Context                  context.Context
 }
 
 // Tree represent a Tree
@@ -101,6 +102,9 @@ func (t *Tree) Next(jsonRequest map[string]interface{}, config *TreeOptions) (*T
 		if selected != nil {
 			if t.ctx != nil {
 				t.ctx = contextValue(t.ctx, n.ID, n.Key, jsonValue, n.Operator, n.Value)
+			}
+			if config.Context != nil {
+				config.Context = contextValue(config.Context, n.ID, n.Key, jsonValue, n.Operator, n.Value)
 			}
 			return selected, nil
 		}
