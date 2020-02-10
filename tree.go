@@ -14,6 +14,7 @@ type TreeOptions struct {
 	StopIfConvertingError    bool
 	Operators                map[string]Operator
 	OverrideExistingOperator bool
+	context                  context.Context
 }
 
 // Tree represent a Tree
@@ -103,6 +104,10 @@ func (t *Tree) Next(jsonRequest map[string]interface{}, config *TreeOptions) (*T
 			if t.ctx != nil {
 				t.ctx = contextValue(t.ctx, n.ID, n.Key, jsonValue, n.Operator, n.Value)
 			}
+
+			if config.context != nil {
+				config.context = contextValue(config.context, n.ID, n.Key, jsonValue, n.Operator, n.Value)
+			}
 			return selected, nil
 		}
 	}
@@ -171,6 +176,40 @@ func (t *Tree) Resolve(request map[string]interface{}, options ...func(t *TreeOp
 	}
 
 	return t.resolve(request, config)
+}
+
+// ResolveJSONWithContext calculate which will be the selected node according to the jsonRequest
+func (t *Tree) ResolveJSONWithContext(ctx context.Context, jsonRequest []byte, options ...func(t *TreeOptions)) (*Tree, context.Context, error) {
+	var request map[string]interface{}
+	err := json.Unmarshal(jsonRequest, &request)
+	if err != nil {
+		return nil, ctx, err
+	}
+
+	return t.ResolveWithContext(ctx, request, options...)
+}
+
+// ResolveWithContext calculate which will be the selected node according to the map request
+func (t *Tree) ResolveWithContext(ctx context.Context, request map[string]interface{}, options ...func(t *TreeOptions)) (*Tree, context.Context, error) {
+	config := &TreeOptions{
+		context: ctx,
+	}
+
+	for _, option := range options {
+		option(config)
+	}
+
+	if len(config.Operators) > 0 {
+		for k := range config.Operators {
+			if isExistingOperator(k) {
+				config.OverrideExistingOperator = true
+				break
+			}
+		}
+	}
+
+	result, err := t.resolve(request, config)
+	return result, config.context, err
 }
 
 func (t *Tree) resolve(request map[string]interface{}, config *TreeOptions) (*Tree, error) {
