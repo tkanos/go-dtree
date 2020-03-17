@@ -102,11 +102,11 @@ func (t *Tree) Next(jsonRequest map[string]interface{}, config *TreeOptions) (*T
 
 		if selected != nil {
 			if t.ctx != nil {
-				t.ctx = contextValue(t.ctx, n.ID, n.Key, jsonValue, n.Operator, n.Value)
+				t.ctx = contextValue(t.ctx, selected.ID, selected.Key, jsonValue, selected.Operator, selected.Value)
 			}
 
 			if config.context != nil {
-				config.context = contextValue(config.context, n.ID, n.Key, jsonValue, n.Operator, n.Value)
+				config.context = contextValue(config.context, selected.ID, selected.Key, jsonValue, selected.Operator, selected.Value)
 			}
 			return selected, nil
 		}
