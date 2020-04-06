@@ -104,6 +104,7 @@ This one was a simple decision Tree. You can build more complexe with more nodes
 | count          | count (only for arrays)                                                             |
 | regexp         | do a regexp (only for string)                                                       |
 | percent (or %) | do a random selection based on percentages                                          |
+| ab             | A/B Test (if no userId provided, it will act as percent)                            |
 
 You can also define your own operators 
 

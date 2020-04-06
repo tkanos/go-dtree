@@ -801,3 +801,136 @@ func TestPercentage_Should_Return_A_Node(t *testing.T) {
 	assert.NoError(t, err, "percentage should not return an error, if all is ok")
 	assert.NotNil(t, result, "percentage should return a node if all is ok")
 }
+
+func TestCRC32(t *testing.T) {
+	num1 := crc32Num("entity1", "salt1", 1000)
+	num2 := crc32Num("entity2", "salt1", 1000)
+	num3 := crc32Num("entity1", "salt1", 1000)
+	assert.Equal(t, num1, num3)
+	assert.NotEqual(t, num1, num2)
+}
+
+// TestAbTest_Without_Parent_Node_Should_Return_Nil should return nil, if no parent
+func TestAbTest_Without_Parent_Node_Should_Return_Nil(t *testing.T) {
+	//Arrange
+	percentTree := &Tree{}
+	//Act
+	result, err := abTest(nil, percentTree)
+
+	//Assert
+	assert.Equal(t, err, ErrNoParentNode, "A/B Test should return an error, if no parents")
+	assert.Nil(t, result, "A/B Test should return nil, if no parent")
+}
+
+// func TestAbTest_Without_Brother_Node_Should_Return_ItSelf should return itself, if no brother
+func TestAbTest_Without_Brother_Node_Should_Return_ItSelf(t *testing.T) {
+	//Arrange
+	rootTree := &Tree{}
+	rootTree.AddNode(&Tree{})
+	//Act
+	result, err := abTest(nil, rootTree.GetChild()[0])
+
+	//Assert
+	assert.NoError(t, err, "A/B Test should not return an error, if there is no brothers")
+	assert.Equal(t, rootTree.GetChild()[0], result, "A/B Test should return the node itself, when there is no brothers")
+}
+
+// TestAbTest_Without_FloatValue_Should_Return_Nil should return nil, if the value is no parsable to float64
+func TestAbTest_Without_FloatValue_Should_Return_Nil(t *testing.T) {
+	//Arrange
+	rootTree := &Tree{}
+	rootTree.AddNode(&Tree{
+		Operator: "ab",
+		Value:    123,
+	})
+	rootTree.AddNode(&Tree{
+		Operator: "ab",
+		Value:    123,
+	})
+	//Act
+	result, err := abTest(nil, rootTree.GetChild()[0])
+
+	//Assert
+	assert.NoError(t, err, "A/B Test should not return an error, if the value is no parsable to float64")
+	assert.Nil(t, result, "A/B Test should return nil, if the value is no parsable to float64")
+}
+
+// TestAbTest_With_FallBack_Should_Return_Fallback fallback should be returned if it is defined and there is no others choice
+func TestAbTest_With_FallBack_Should_Return_Fallback(t *testing.T) {
+	//Arrange
+	rootTree := &Tree{}
+	rootTree.AddNode(&Tree{
+		Operator: "ab",
+		Value:    123,
+	})
+	rootTree.AddNode(&Tree{
+		Value: FallbackType,
+	})
+	//Act
+	result, err := abTest(nil, rootTree.GetChild()[0])
+
+	//Assert
+	assert.NoError(t, err, "A/B Test should not return an error, if fallback is defined")
+	assert.Equal(t, rootTree.GetChild()[1], result, "A/B Test should return falback, if fallback is defined, and there is no others choice")
+}
+
+// TestAbTest_Should_Return_A_Node should return a node, if all is ok
+func TestAbTest_Should_Return_A_Node_Like_For_precentage(t *testing.T) {
+	//Arrange
+	rootTree := &Tree{}
+	rootTree.AddNode(&Tree{
+		ID:       123,
+		Operator: "ab",
+		Value:    50.0,
+	})
+	rootTree.AddNode(&Tree{
+		ID:       456,
+		Operator: "ab",
+		Value:    50.0,
+	})
+	//Act
+	result1, err1 := abTest(nil, rootTree.GetChild()[0])
+	result2, err2 := abTest(nil, rootTree.GetChild()[0])
+	result3, err3 := abTest(nil, rootTree.GetChild()[0])
+	result4, err4 := abTest(nil, rootTree.GetChild()[0])
+
+	//Assert
+	assert.NoError(t, err1, "A/B Test should not return an error, if all is ok")
+	assert.NoError(t, err2, "A/B Test should not return an error, if all is ok")
+	assert.NoError(t, err3, "A/B Test should not return an error, if all is ok")
+	assert.NoError(t, err4, "A/B Test should not return an error, if all is ok")
+	assert.True(t, result1.ID != result2.ID || result2.ID != result3.ID || result3.ID != result4.ID, "A/B Test should return 4 different node if all is ok")
+}
+
+// TestAbTest_Should_Return_A_Node should return a node, if all is ok
+func TestAbTest_Should_Return_The_Same_Node_By_UserId(t *testing.T) {
+	//Arrange
+	rootTree := &Tree{}
+	rootTree.AddNode(&Tree{
+		ID:       123,
+		Operator: "ab",
+		Value:    50.0,
+	})
+	rootTree.AddNode(&Tree{
+		ID:       456,
+		Operator: "ab",
+		Value:    50.0,
+	})
+	//Act
+	result1, err1 := abTest("Felipe", rootTree.GetChild()[0])
+	result2, _ := abTest("Felipe", rootTree.GetChild()[0])
+	result3, _ := abTest("Felipe", rootTree.GetChild()[0])
+	result4, _ := abTest("Felipe", rootTree.GetChild()[0])
+
+	result1_1, err2 := abTest("Another", rootTree.GetChild()[0])
+	result2_1, _ := abTest("Another", rootTree.GetChild()[0])
+	result3_1, _ := abTest("Another", rootTree.GetChild()[0])
+	result4_1, _ := abTest("Another", rootTree.GetChild()[0])
+
+	//Assert
+	assert.NoError(t, err1, "A/B Test should not return an error, if all is ok")
+	assert.NoError(t, err2, "A/B Test should not return an error, if all is ok")
+	assert.True(t, result1.ID == result2.ID && result2.ID == result3.ID && result3.ID == result4.ID, "A/B Test should return 4 same node if all is ok")
+	assert.NotEqual(t, result1.ID, result1_1.ID, "A/B Test should return 2 different node if different usersId")
+	assert.True(t, result1_1.ID == result2_1.ID && result2_1.ID == result3_1.ID && result3_1.ID == result4_1.ID, "A/B Test should return 4 same node if all is ok")
+}

@@ -2,6 +2,7 @@ package dtree
 
 import (
 	"errors"
+	"hash/crc32"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -73,6 +74,8 @@ func compare(requests map[string]interface{}, jsonValue interface{}, node *Tree,
 		return regex(jsonValue, node)
 	case "percent", "%":
 		return percentage(jsonValue, node)
+	case "ab":
+		return abTest(jsonValue, node)
 	default:
 		if config != nil && config.OverrideExistingOperator == false {
 			if r, err := runOperators(requests, node, config); err != ErrOperator {
@@ -421,4 +424,58 @@ func percentage(v1 interface{}, v2 *Tree) (*Tree, error) {
 	}
 
 	return nil, nil
+}
+
+// abTest hash the value, to know if it falls on one of the bucket of the percents node.
+func abTest(v1 interface{}, v2 *Tree) (*Tree, error) {
+	if v2.GetParent() == nil {
+		return nil, ErrNoParentNode
+	}
+
+	brothersNode := v2.GetParent().GetChild()
+
+	if brothersNode == nil || len(brothersNode) == 1 {
+		return v2, nil
+	}
+
+	var percent float64
+
+	if t1, ok := v1.(string); ok {
+		percent = float64(crc32Num(t1, "salt", 1000)) / 10
+	} else {
+		percent = rand.Float64() * 100.0
+	}
+
+	var fallbackNode *Tree
+	var total float64
+
+	for _, node := range brothersNode {
+		if node.Operator == "ab" {
+			if tn, ok := node.Value.(float64); ok {
+				max := total + tn
+				if percent <= max {
+					return node, nil
+				}
+				total = total + tn
+			}
+		}
+
+		// search if it exist a fallback node
+		if tn, ok := node.Value.(string); ok && tn == FallbackType {
+			fallbackNode = node
+		}
+	}
+
+	// check for fallback
+	if fallbackNode != nil {
+		return fallbackNode, nil
+	}
+
+	return nil, nil
+}
+
+func crc32Num(entityID string, salt string, totalBucketNum uint) uint {
+	// crc32 is good in terms of uniform distribution
+	// http://michiel.buddingh.eu/distribution-of-hash-values
+	return uint(crc32.ChecksumIEEE([]byte(salt+entityID))) % totalBucketNum
 }
