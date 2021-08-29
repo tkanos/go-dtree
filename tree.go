@@ -3,7 +3,11 @@ package dtree
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sort"
+	"strings"
+
+	drawer "github.com/m1gwings/treedrawer/tree"
 )
 
 // Operator represent a function that will evaluate a node
@@ -17,10 +21,12 @@ type TreeOptions struct {
 	context                  context.Context
 }
 
-// Tree represent a Tree
+// Tree represents a Tree
 type Tree struct {
 	nodes  []*Tree
 	parent *Tree
+
+	treeDrawer *drawer.Tree
 
 	ctx context.Context
 
@@ -222,4 +228,25 @@ func (t *Tree) resolve(request map[string]interface{}, config *TreeOptions) (*Tr
 		return t, err
 	}
 	return temp.resolve(request, config)
+}
+
+func (t *Tree) String() string {
+	d := drawer.NewTree(drawer.NodeString(""))
+	buildDrawerTree(t, d)
+	return d.String()
+}
+
+func buildDrawerTree(t *Tree, d *drawer.Tree) {
+	d.SetVal(drawer.NodeString(t.ValueToDraw()))
+	for i := range t.GetChild() {
+		tChild := d.AddChild(drawer.NodeString(""))
+		buildDrawerTree(t.GetChild()[i], tChild)
+	}
+}
+
+func (t *Tree) ValueToDraw() string {
+	if t.Name != "" {
+		return t.Name
+	}
+	return strings.TrimSpace(fmt.Sprintf("%s %s %v", t.Key, t.Operator, t.Value))
 }

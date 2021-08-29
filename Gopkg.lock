@@ -10,6 +10,17 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:dfe2f4c7e2884ff502e55288f44f52c55eb3dcc8d196f4ecdcc5d09d8fcf067a"
+  name = "github.com/m1gwings/treedrawer"
+  packages = [
+    "drawer",
+    "tree",
+  ]
+  pruneopts = "UT"
+  revision = "72249debfda722a1021638504f8292db867a034e"
+  version = "v0.3.3-beta"
+
+[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -28,6 +39,9 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/stretchr/testify/assert"]
+  input-imports = [
+    "github.com/m1gwings/treedrawer/tree",
+    "github.com/stretchr/testify/assert",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
