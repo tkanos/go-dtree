@@ -244,6 +244,7 @@ func buildDrawerTree(t *Tree, d *drawer.Tree) {
 	}
 }
 
+// ValueToDraw draws the Node
 func (t *Tree) ValueToDraw() string {
 	if t.Name != "" {
 		return t.Name
