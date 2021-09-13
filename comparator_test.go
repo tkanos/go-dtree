@@ -1,6 +1,7 @@
 package dtree
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -876,6 +877,9 @@ func TestAbTest_With_FallBack_Should_Return_Fallback(t *testing.T) {
 
 // TestAbTest_Should_Return_A_Node should return a node, if all is ok
 func TestAbTest_Should_Return_A_Node_Like_For_precentage(t *testing.T) {
+	if os.Getenv("TEST_SKIP") != "" {
+		t.Skip("Skipping random test, that won't work on CI process")
+	}
 	//Arrange
 	rootTree := &Tree{}
 	rootTree.AddNode(&Tree{

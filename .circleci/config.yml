@@ -20,7 +20,8 @@ jobs:
     docker:
       # specify the version
       - image: circleci/golang:1.9
-      
+    environment:
+      TEST_SKIP: true
     working_directory: /go/src/github.com/tkanos/go-dtree
     steps:
       - checkout
