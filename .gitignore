@@ -7,3 +7,5 @@
 vendor/
 
 debug
+
+go-dtree.code-workspace

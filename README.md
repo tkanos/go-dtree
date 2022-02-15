@@ -54,7 +54,7 @@ it will create :
 
 <img src="./docs/images/first-tree.png" height=60%>
 
-If you want to programmaticaly build your tree, you can also use the CreateTree Method.
+If you want to programmatically build your tree, you can also use the CreateTree Method.
 
 ```golang
 var myTree []Tree
@@ -87,9 +87,7 @@ you can also define it programmatically,
     // Output: Welcome
 ```
 
-but in this case be careful, to don't use int (not supported), only floats.
-
-This one was a simple decision Tree. You can build more complexe with more nodes, with others operators than only equal.
+This one was a simple decision Tree. You can build more complex with more nodes, with others operators than only equal.
 
 ## Available Operators :
 | operator       | description                                                                         |
@@ -110,13 +108,13 @@ You can also define your own operators
 
 ## string comparition
 
-All the strings are case compared (without ToLower before the comparition)
+All the strings are case compared (without ToLower before the comparison)
 
 ```
 s1 == s2
 ```
 
-if you are not sure about the data, and you want to do ToLower comparition, if you two choice:
+if you are not sure about the data, and you want to do ToLower comparison, if you two choice:
 - Write your own operator
 - Lower your tree data and json request, before to call Resolve.
 
@@ -187,8 +185,8 @@ v, _ := t.Resolve(request)
 sliceOfString := dtree.GetNodePathFromContext(t.Context())
 fmt.Println(sliceOfString)
 
-// sliceofstring contains is a slice where each string is a node on the format `id : key value operator expectedvalue`
-// example : 3 : productid 1234 gt 1230
+// sliceOfString contains a slice where each string is a node on the format `id : key value operator expectedValue`
+// example : 3 : productID 1234 gt 1230
 ```
 
 

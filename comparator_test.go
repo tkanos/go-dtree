@@ -347,17 +347,6 @@ var tts = []tt{
 		},
 	},
 	{
-		name: "([]string) v1 == v2",
-		v1:   []string{"a", "b"},
-		v2:   &Tree{Value: []interface{}{"a"}},
-		want: map[string]want{
-			"eq": {
-				result: true,
-				err:    nil,
-			},
-		},
-	},
-	{
 		name: "(string) []interface{v1,...} == []interface{v2,...}",
 		v1:   []interface{}{"g", "a"},
 		v2:   &Tree{Value: []interface{}{"g"}},
@@ -374,7 +363,7 @@ var tts = []tt{
 		v2:   &Tree{Value: []interface{}{"b"}},
 		want: map[string]want{
 			"eq": {
-				result: true,
+				result: false,
 				err:    nil,
 			},
 		},

@@ -290,7 +290,7 @@ func TestTreeLegacy(t *testing.T) {
 			ParentID: 0,
 			Name:     "1",
 			Legacy: map[string][]interface{}{
-				"cost": []interface{}{20},
+				"cost": {20},
 			},
 		},
 		{
@@ -300,7 +300,7 @@ func TestTreeLegacy(t *testing.T) {
 			Value:    true,
 			Operator: "eq",
 			Key:      "2",
-			Legacy:   map[string][]interface{}{"cost": []interface{}{50}},
+			Legacy:   map[string][]interface{}{"cost": {50}},
 		},
 		{
 			ID:       4,
@@ -309,7 +309,7 @@ func TestTreeLegacy(t *testing.T) {
 			Value:    true,
 			Operator: "eq",
 			Key:      "4",
-			Legacy:   map[string][]interface{}{"cost": []interface{}{40}},
+			Legacy:   map[string][]interface{}{"cost": {40}},
 		},
 		{
 			ID:       5,
@@ -318,7 +318,7 @@ func TestTreeLegacy(t *testing.T) {
 			Value:    true,
 			Operator: "eq",
 			Key:      "5",
-			Legacy:   map[string][]interface{}{"cost": []interface{}{100}},
+			Legacy:   map[string][]interface{}{"cost": {100}},
 		},
 	}
 	newTree := CreateTree(tree)
@@ -330,7 +330,7 @@ func TestTreeLegacy(t *testing.T) {
 	request["3"] = false
 
 	want := map[string][]interface{}{
-		"cost": []interface{}{50, 20},
+		"cost": {50, 20},
 	}
 
 	v, err := newTree.Resolve(request)

@@ -16,10 +16,8 @@ func main() {
 			Operator: "eq",
 			Key:      "1",
 			Legacy: map[string][]interface{}{
-				"cost": []interface{}{10},
-				"test": []interface{}{
-					"testValue",
-				},
+				"cost": {10},
+				"test": {"testValue"},
 			},
 		},
 		{
@@ -30,7 +28,18 @@ func main() {
 			Operator: "eq",
 			Key:      "2",
 			Legacy: map[string][]interface{}{
-				"cost": []interface{}{20},
+				"cost": {20},
+			},
+		},
+		{
+			ID:       3,
+			Name:     "3",
+			ParentID: 1,
+			Value:    12,
+			Operator: "eq",
+			Key:      "3",
+			Legacy: map[string][]interface{}{
+				"cost": {50},
 			},
 		},
 	}
@@ -47,6 +56,8 @@ func main() {
 		panic(err)
 	}
 
-	// output: legacy map[cost:[20 10]]
+	fmt.Println(tree)
+
+	// output: legacy map[cost:[20 10] test:[testValue]]
 	fmt.Println("legacy", resolve.Legacy)
 }
