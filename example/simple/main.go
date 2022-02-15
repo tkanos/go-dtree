@@ -78,12 +78,19 @@ func main() {
 				"parent_id": 9,
 				"key": "age",
 				"operator": "lte",
-				"value": 60
+				"value": 60,
+				"Headers": {
+					"year": 89
+				}
 			},
 			{
 				"id": 13,
 				"parent_id": 12,
-				"Name": "Hello dude"
+				"Name": "Hello dude",
+				"Content": "mura",
+				"Headers": {
+					"name": "kalle"
+				}
 			}
 		]`)
 

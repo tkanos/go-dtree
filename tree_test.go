@@ -75,8 +75,8 @@ func TestTree_SimpleTest(t *testing.T) {
 
 	//Load Tree
 	tr, err := LoadTree(treeTest)
-	if err != nil {
-		t.Fail()
+	if !assert.NoError(t, err) {
+		t.FailNow()
 	}
 
 	// Load request
@@ -277,4 +277,65 @@ func ExampleLoadTree() {
 
 	fmt.Println(v.Name)
 	// output : Hello dude
+}
+
+func TestTreeLegacy(t *testing.T) {
+	tree := []Tree{
+		{
+			ID:   1,
+			Name: "root",
+		},
+		{
+			ID:       2,
+			ParentID: 0,
+			Name:     "1",
+			Legacy: map[string][]interface{}{
+				"cost": []interface{}{20},
+			},
+		},
+		{
+			ID:       3,
+			ParentID: 2,
+			Name:     "2",
+			Value:    true,
+			Operator: "eq",
+			Key:      "2",
+			Legacy:   map[string][]interface{}{"cost": []interface{}{50}},
+		},
+		{
+			ID:       4,
+			ParentID: 3,
+			Name:     "4",
+			Value:    true,
+			Operator: "eq",
+			Key:      "4",
+			Legacy:   map[string][]interface{}{"cost": []interface{}{40}},
+		},
+		{
+			ID:       5,
+			ParentID: 2,
+			Name:     "5",
+			Value:    true,
+			Operator: "eq",
+			Key:      "5",
+			Legacy:   map[string][]interface{}{"cost": []interface{}{100}},
+		},
+	}
+	newTree := CreateTree(tree)
+
+	fmt.Println(newTree)
+
+	request := make(map[string]interface{})
+	request["2"] = true
+	request["3"] = false
+
+	want := map[string][]interface{}{
+		"cost": []interface{}{50, 20},
+	}
+
+	v, err := newTree.Resolve(request)
+	assert.NoError(t, err)
+
+	assert.Equal(t, want, v.Legacy)
+
 }

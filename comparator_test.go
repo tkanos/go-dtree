@@ -1,721 +1,788 @@
 package dtree
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var containstt = []struct {
-	v1     interface{}
-	v2     *Tree
-	err    error
+type want struct {
 	result bool
-
-	message string
-}{
-	{
-		v1:      123,
-		message: "Contains should not support others type than string as request",
-		result:  false,
-		err:     ErrNotSupportedType,
-	},
-	{
-		v1:      "123",
-		v2:      &Tree{Value: 123},
-		message: "Contains should not support others type than string as Tree Value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "abcdefghijkl",
-		v2:      &Tree{Value: "mnopqrstu"},
-		message: "Contains should return false if v1 does not contains v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "abcdefghijkl",
-		v2:      &Tree{Value: "def"},
-		message: "Contains should return true if v1 contains v2",
-		result:  true,
-		err:     nil,
-	},
-}
-
-// TestContains test contains feature
-func TestContains(t *testing.T) {
-	for _, tt := range containstt {
-		// Act
-		result, err := contains(tt.v1, tt.v2)
-
-		// Assert
-		assert.Equal(t, tt.err, err, tt.message)
-		assert.Equal(t, tt.result, (result != nil), tt.message)
-	}
-}
-
-var counttt = []struct {
-	v1     interface{}
-	v2     *Tree
 	err    error
-	result bool
+}
 
-	message string
-}{
+type tt struct {
+	name string
+	v1   interface{}
+	v2   *Tree
+	err  error
+	want map[string]want
+}
+
+var tts = []tt{
 	{
-		v1:      123,
-		message: "Count should not support others type than []interface{} as request",
-		result:  false,
-		err:     ErrNotSupportedType,
+		name: "string v1 < v2",
+		v1:   "e",
+		v2:   &Tree{Value: "g"},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+			"lt": {
+				result: true,
+				err:    nil,
+			},
+			"lte": {
+				result: true,
+				err:    nil,
+			},
+			"gt": {
+				result: false,
+				err:    nil,
+			},
+			"gte": {
+				result: false,
+				err:    nil,
+			},
+		},
 	},
 	{
-		v1:      []interface{}{1, 2, 3},
-		v2:      &Tree{Value: "not float64"},
-		message: "Count should not support others type than float64 as Tree value",
-		result:  false,
-		err:     ErrBadType,
+		name: "string v1 > v2",
+		v1:   "b",
+		v2:   &Tree{Value: "a"},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+			"lt": {
+				result: false,
+				err:    nil,
+			},
+			"lte": {
+				result: false,
+				err:    nil,
+			},
+			"gt": {
+				result: true,
+				err:    nil,
+			},
+			"gte": {
+				result: true,
+				err:    nil,
+			},
+		},
 	},
 	{
-		v1:      []interface{}{1, 2, 3},
-		v2:      &Tree{Value: 5.0},
-		message: "Count should return false if len(v1) != v2",
-		result:  false,
-		err:     nil,
+		name: "string v1 = v2",
+		v1:   "e",
+		v2:   &Tree{Value: "e"},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+			"lt": {
+				result: false,
+				err:    nil,
+			},
+			"lte": {
+				result: true,
+				err:    nil,
+			},
+			"gt": {
+				result: false,
+				err:    nil,
+			},
+			"gte": {
+				result: true,
+				err:    nil,
+			},
+		},
 	},
 	{
-		v1:      []interface{}{1, 2, 3},
-		v2:      &Tree{Value: 3.0},
-		message: "Count should return false if len(v1) == v2",
-		result:  true,
-		err:     nil,
+		name: "int v1 < v2",
+		v1:   1,
+		v2:   &Tree{Value: 2},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+			"lt": {
+				result: true,
+				err:    nil,
+			},
+			"lte": {
+				result: true,
+				err:    nil,
+			},
+			"gt": {
+				result: false,
+				err:    nil,
+			},
+			"gte": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "int v1 > v2",
+		v1:   2,
+		v2:   &Tree{Value: 1},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+			"lt": {
+				result: false,
+				err:    nil,
+			},
+			"lte": {
+				result: false,
+				err:    nil,
+			},
+			"gt": {
+				result: true,
+				err:    nil,
+			},
+			"gte": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "int v1 = v2",
+		v1:   2,
+		v2:   &Tree{Value: 2},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+			"lt": {
+				result: false,
+				err:    nil,
+			},
+			"lte": {
+				result: true,
+				err:    nil,
+			},
+			"gt": {
+				result: false,
+				err:    nil,
+			},
+			"gte": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "int64 v1 < v2",
+		v1:   int64(1),
+		v2:   &Tree{Value: int64(2)},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+			"lt": {
+				result: true,
+				err:    nil,
+			},
+			"lte": {
+				result: true,
+				err:    nil,
+			},
+			"gt": {
+				result: false,
+				err:    nil,
+			},
+			"gte": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "int64 v1 > v2",
+		v1:   int64(2),
+		v2:   &Tree{Value: int64(1)},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+			"lt": {
+				result: false,
+				err:    nil,
+			},
+			"lte": {
+				result: false,
+				err:    nil,
+			},
+			"gt": {
+				result: true,
+				err:    nil,
+			},
+			"gte": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "int64 v1 = v2",
+		v1:   int64(2),
+		v2:   &Tree{Value: int64(2)},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+			"lt": {
+				result: false,
+				err:    nil,
+			},
+			"lte": {
+				result: true,
+				err:    nil,
+			},
+			"gt": {
+				result: false,
+				err:    nil,
+			},
+			"gte": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "float64 v1 < v2",
+		v1:   float64(1),
+		v2:   &Tree{Value: float64(2)},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+			"lt": {
+				result: true,
+				err:    nil,
+			},
+			"lte": {
+				result: true,
+				err:    nil,
+			},
+			"gt": {
+				result: false,
+				err:    nil,
+			},
+			"gte": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "float64 v1 > v2",
+		v1:   float64(2),
+		v2:   &Tree{Value: float64(1)},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+			"lt": {
+				result: false,
+				err:    nil,
+			},
+			"lte": {
+				result: false,
+				err:    nil,
+			},
+			"gt": {
+				result: true,
+				err:    nil,
+			},
+			"gte": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "float64 v1 = v2",
+		v1:   float64(2),
+		v2:   &Tree{Value: float64(2)},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+			"lt": {
+				result: false,
+				err:    nil,
+			},
+			"lte": {
+				result: true,
+				err:    nil,
+			},
+			"gt": {
+				result: false,
+				err:    nil,
+			},
+			"gte": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "([]string) v1 == v2",
+		v1:   []string{"a", "b"},
+		v2:   &Tree{Value: []interface{}{"a"}},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(string) []interface{v1,...} == []interface{v2,...}",
+		v1:   []interface{}{"g", "a"},
+		v2:   &Tree{Value: []interface{}{"g"}},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(string) []interface{v1,...} != []interface{v2,...}",
+		v1:   []interface{}{"g", "a"},
+		v2:   &Tree{Value: []interface{}{"b"}},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(string) []interface{v1,...} == v2",
+		v1:   []interface{}{"g", "a"},
+		v2:   &Tree{Value: "g"},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(string) v1 == []interface{v1,...}",
+		v1:   "g",
+		v2:   &Tree{Value: []interface{}{"g", "a"}},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "string []interface{v1,...} != v2",
+		v1:   []interface{}{"b", "a"},
+		v2:   &Tree{Value: "g"},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "string v1 != []interface{v1,...}",
+		v1:   "g",
+		v2:   &Tree{Value: []interface{}{"b", "a"}},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(float64) v1 != v2",
+		v1:   9.0,
+		v2:   &Tree{Value: 10.0},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(float64) v1 == v2",
+		v1:   10.0,
+		v2:   &Tree{Value: 10.0},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(float64) []interface{v1,...} == v2",
+		v1:   []interface{}{9.0, 8.8},
+		v2:   &Tree{Value: 8.8},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(float64) v1 == []interface{v1,...}",
+		v1:   float64(9.0),
+		v2:   &Tree{Value: []interface{}{9.0, 8.8}},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(float64) []interface{v1,...} != v2",
+		v1:   []interface{}{9.0, 8.8},
+		v2:   &Tree{Value: 7.7},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(float64) v1 != []interface{v1,...}",
+		v1:   float64(7.7),
+		v2:   &Tree{Value: []interface{}{9.0, 8.8}},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(int64) []interface{v1,...} == v2",
+		v1:   []interface{}{int64(9), int64(8)},
+		v2:   &Tree{Value: int64(8)},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(int64) v1 == []interface{v1,...}",
+		v1:   int64(8),
+		v2:   &Tree{Value: []interface{}{int64(9), int64(8)}},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(int64) []interface{v1,...} != v2",
+		v1:   []interface{}{int64(9), int64(8)},
+		v2:   &Tree{Value: int64(7)},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(int64) v1 != []interface{v1,...}",
+		v1:   int64(7),
+		v2:   &Tree{Value: []interface{}{int64(9), int64(8)}},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(int) []interface{v1,...} == v2",
+		v1:   []interface{}{9, 8},
+		v2:   &Tree{Value: 8},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(int) v1 == []interface{v1,...}",
+		v1:   8,
+		v2:   &Tree{Value: []interface{}{9, 8}},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(int) []interface{v1,...} != v2",
+		v1:   []interface{}{9, 8},
+		v2:   &Tree{Value: 7},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(int) v1 != []interface{v1,...}",
+		v1:   7,
+		v2:   &Tree{Value: []interface{}{9, 8}},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(bool) v1 != v2",
+		v1:   false,
+		v2:   &Tree{Value: true},
+		want: map[string]want{
+			"eq": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(bool) v1 == v2",
+		v1:   true,
+		v2:   &Tree{Value: true},
+		want: map[string]want{
+			"eq": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(compare) fallback",
+		v2:   &Tree{Value: "fallback"},
+		want: map[string]want{
+			"compare": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "(compare) unsupported operator",
+		v2:   &Tree{Value: 123, Operator: "abc"},
+		want: map[string]want{
+			"compare": {
+				result: false,
+				err:    ErrOperator,
+			},
+		},
+	},
+	{
+		v1: "abcdefghijkl",
+		v2: &Tree{Value: "[0-9]+"},
+		want: map[string]want{
+			"regex": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		v1: "abcdefgh45jkl",
+		v2: &Tree{Value: "[0-9]+"},
+		want: map[string]want{
+			"regex": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "Not supported type (int)",
+		v1:   123,
+		want: map[string]want{
+			"regex": {
+				result: false,
+				err:    ErrNotSupportedType,
+			},
+		},
+	},
+	{
+		name: "forbidden int type in tree value",
+		v1:   "123",
+		v2:   &Tree{Value: 123},
+		want: map[string]want{
+			"regex": {
+				result: false,
+				err:    ErrBadType,
+			},
+		},
+	},
+	{
+		name: "!(v1 U v2)",
+		v1:   "abcdef",
+		v2:   &Tree{Value: "fed"},
+		want: map[string]want{
+			"contains": {
+				result: false,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "v1 U v2",
+		v1:   "abcdef",
+		v2:   &Tree{Value: "def"},
+		want: map[string]want{
+			"contains": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "int U {}",
+		v1:   123,
+		v2:   &Tree{},
+		want: map[string]want{
+			"contains": {
+				result: false,
+				err:    ErrNotSupportedType,
+			},
+		},
+	},
+	{
+		name: "string U int",
+		v1:   "123",
+		v2:   &Tree{Value: 123},
+		want: map[string]want{
+			"contains": {
+				result: false,
+				err:    ErrBadType,
+			},
+		},
+	},
+	{
+		name: "v1 not allowed",
+		v1:   123,
+		want: map[string]want{
+			"count": {
+				result: false,
+				err:    ErrNotSupportedType,
+			},
+		},
+	},
+	{
+		name: "int",
+		v1:   []int{1, 2, 3},
+		v2:   &Tree{Value: 3},
+		want: map[string]want{
+			"count": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "int64",
+		v1:   []int64{1, 2, 3},
+		v2:   &Tree{Value: int64(3)},
+		want: map[string]want{
+			"count": {
+				result: true,
+				err:    nil,
+			},
+		},
+	},
+	{
+		name: "float64",
+		v1:   []float64{1.1, 2.2, 3.3},
+		v2:   &Tree{Value: float64(3.0)},
+		want: map[string]want{
+			"count": {
+				result: true,
+				err:    nil,
+			},
+		},
 	},
 }
 
-// TestCount test Count feature
-func TestCount(t *testing.T) {
-	for _, tt := range counttt {
-		// Act
-		result, err := count(tt.v1, tt.v2)
-
-		// Assert
-		assert.Equal(t, tt.err, err, tt.message)
-		assert.Equal(t, tt.result, (result != nil), tt.message)
-	}
-}
-
-var gttt = []struct {
-	v1     interface{}
-	v2     *Tree
-	err    error
-	result bool
-
-	message string
-}{
-	{
-		v1:      123,
-		message: "gt should not support others type than float64 and string as request",
-		result:  false,
-		err:     ErrNotSupportedType,
-	},
-	{
-		v1:      123.0,
-		v2:      &Tree{Value: 123},
-		message: "gt should not support others type than float64 and string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "a",
-		v2:      &Tree{Value: 123},
-		message: "gt should not support others type than float64 and string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "e",
-		v2:      &Tree{Value: "g"},
-		message: "gt (string) should return false if v1 < v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "g",
-		v2:      &Tree{Value: "g"},
-		message: "gt (string) should return false if v1 == v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "t",
-		v2:      &Tree{Value: "g"},
-		message: "gt (string) should return true if v1 > v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      9.0,
-		v2:      &Tree{Value: 10.0},
-		message: "gt (float46) should return false if v1 < v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      10.0,
-		v2:      &Tree{Value: 10.0},
-		message: "gt (float46) should return false if v1 == v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      15.0,
-		v2:      &Tree{Value: 10.0},
-		message: "gt (float46) should return true if v1 > v2",
-		result:  true,
-		err:     nil,
-	},
-}
-
-// TestGt test GreatherThan feature
-func TestGt(t *testing.T) {
-	for _, tt := range gttt {
-		// Act
-		result, err := gt(tt.v1, tt.v2)
-
-		// Assert
-		assert.Equal(t, tt.err, err, tt.message)
-		assert.Equal(t, tt.result, (result != nil), tt.message)
-	}
-}
-
-var lttt = []struct {
-	v1     interface{}
-	v2     *Tree
-	err    error
-	result bool
-
-	message string
-}{
-	{
-		v1:      123,
-		message: "lt should not support others type than float64 and string as request",
-		result:  false,
-		err:     ErrNotSupportedType,
-	},
-	{
-		v1:      123.0,
-		v2:      &Tree{Value: 123},
-		message: "lt should not support others type than float64 and string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "a",
-		v2:      &Tree{Value: 123},
-		message: "lt should not support others type than float64 and string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "g",
-		v2:      &Tree{Value: "e"},
-		message: "lt (string) should return false if v1 > v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "g",
-		v2:      &Tree{Value: "g"},
-		message: "lt (string) should return false if v1 == v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "g",
-		v2:      &Tree{Value: "t"},
-		message: "lt (string) should return true if v1 < v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      10.0,
-		v2:      &Tree{Value: 9.0},
-		message: "lt (float64) should return false if v1 > v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      10.0,
-		v2:      &Tree{Value: 10.0},
-		message: "lt (float64) should return false if v1 == v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      10.0,
-		v2:      &Tree{Value: 15.0},
-		message: "lt (float64) should return true if v1 < v2",
-		result:  true,
-		err:     nil,
-	},
-}
-
-// TestLt test LessThan feature
-func TestLt(t *testing.T) {
-	for _, tt := range lttt {
-		// Act
-		result, err := lt(tt.v1, tt.v2)
-
-		// Assert
-		assert.Equal(t, tt.err, err, tt.message)
-		assert.Equal(t, tt.result, (result != nil), tt.message)
-	}
-}
-
-var gtett = []struct {
-	v1     interface{}
-	v2     *Tree
-	err    error
-	result bool
-
-	message string
-}{
-	{
-		v1:      123,
-		message: "gte should not support others type than float64 and string as request",
-		result:  false,
-		err:     ErrNotSupportedType,
-	},
-	{
-		v1:      123.0,
-		v2:      &Tree{Value: 123},
-		message: "gte should not support others type than float64 and string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "a",
-		v2:      &Tree{Value: 123},
-		message: "gte should not support others type than float64 and string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "e",
-		v2:      &Tree{Value: "g"},
-		message: "gte (string) should return false if v1 < v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "g",
-		v2:      &Tree{Value: "g"},
-		message: "gte (string) should return true if v1 == v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      "t",
-		v2:      &Tree{Value: "g"},
-		message: "gte (string) should return true if v1 > v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      9.0,
-		v2:      &Tree{Value: 10.0},
-		message: "gte (float64) should return false if v1 < v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      10.0,
-		v2:      &Tree{Value: 10.0},
-		message: "gte (float64) should return false if v1 == v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      15.0,
-		v2:      &Tree{Value: 10.0},
-		message: "gte (float64) should return true if v1 > v2",
-		result:  true,
-		err:     nil,
-	},
-}
-
-// TestGte test GreatherThan Or Equal feature
-func TestGte(t *testing.T) {
-	for _, tt := range gtett {
-		// Act
-		result, err := gte(tt.v1, tt.v2)
-
-		// Assert
-		assert.Equal(t, tt.err, err, tt.message)
-		assert.Equal(t, tt.result, (result != nil), tt.message)
-	}
-}
-
-var ltett = []struct {
-	v1     interface{}
-	v2     *Tree
-	err    error
-	result bool
-
-	message string
-}{
-	{
-		v1:      123,
-		message: "lte should not support others type than float64 and string as request",
-		result:  false,
-		err:     ErrNotSupportedType,
-	},
-	{
-		v1:      123.0,
-		v2:      &Tree{Value: 123},
-		message: "lte should not support others type than float64 and string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "a",
-		v2:      &Tree{Value: 123},
-		message: "lte should not support others type than float64 and string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "g",
-		v2:      &Tree{Value: "e"},
-		message: "lte (string) should return false if v1 > v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "g",
-		v2:      &Tree{Value: "g"},
-		message: "lte (string) should return true if v1 == v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      "g",
-		v2:      &Tree{Value: "t"},
-		message: "lte (string) should return true if v1 < v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      10.0,
-		v2:      &Tree{Value: 9.0},
-		message: "lte (float64) should return false if v1 > v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      10.0,
-		v2:      &Tree{Value: 10.0},
-		message: "lte (float64) should return true if v1 == v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      10.0,
-		v2:      &Tree{Value: 15.0},
-		message: "lte (float64) should return true if v1 < v2",
-		result:  true,
-		err:     nil,
-	},
-}
-
-// TestLte test LessThan Or Equal feature
-func TestLte(t *testing.T) {
-	for _, tt := range ltett {
-		// Act
-		result, err := lte(tt.v1, tt.v2)
-
-		// Assert
-		assert.Equal(t, tt.err, err, tt.message)
-		assert.Equal(t, tt.result, (result != nil), tt.message)
-	}
-}
-
-var eqtt = []struct {
-	v1     interface{}
-	v2     *Tree
-	err    error
-	result bool
-
-	message string
-}{
-	{
-		v1:      123,
-		message: "eq should not support others type than  string, float64, bool, []interface{} (interface{} being a string or float64) as request",
-		result:  false,
-		err:     ErrNotSupportedType,
-	},
-	{
-		v1:      123.0,
-		v2:      &Tree{Value: 123},
-		message: "eq should not support others type than float64, bool, string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "123.0",
-		v2:      &Tree{Value: 123.0},
-		message: "eq should not support others type than float64, bool, string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      true,
-		v2:      &Tree{Value: 123.0},
-		message: "eq should not support others type than float64, bool, string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "123.0",
-		v2:      &Tree{Value: 123.0},
-		message: "eq should not support others type than float64, bool, string as Tree value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      123.0,
-		v2:      &Tree{Value: 122.0},
-		message: "eq (float64) should return false when v1 != v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      123.0,
-		v2:      &Tree{Value: 123.0},
-		message: "eq (float64) should return true when v1 == v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      "a",
-		v2:      &Tree{Value: "b"},
-		message: "eq (string) should return false when v1 != v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "a",
-		v2:      &Tree{Value: "a"},
-		message: "eq (string) should return true when v1 == v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      true,
-		v2:      &Tree{Value: false},
-		message: "eq (bool) should return false when v1 != v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      true,
-		v2:      &Tree{Value: true},
-		message: "eq (bool) should return true when v1 == v2",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      []interface{}{true, false},
-		v2:      &Tree{Value: 122.0},
-		message: "eq should not support others type than []interface{} (interface{} being a string or float64) as request",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      []interface{}{123.0, 456.0},
-		v2:      &Tree{Value: true},
-		message: "eq ([]interface{} => float64) should return false when v2 type not the same as v1 element",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      []interface{}{123.0, 456.0},
-		v2:      &Tree{Value: 122.0},
-		message: "eq ([]interface{} => float64) should return false when v2 are not in v1",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      []interface{}{123.0, 456.0},
-		v2:      &Tree{Value: 456.0},
-		message: "eq ([]interface{} => float64) should return true when v2 are in v1",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      []interface{}{"a", "b"},
-		v2:      &Tree{Value: true},
-		message: "eq ([]interface{} => string) should return false when v2 type not the same as v1 element",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      []interface{}{"a", "b"},
-		v2:      &Tree{Value: "c"},
-		message: "eq ([]interface{} => string) should return false when v2 are not in v1",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      []interface{}{"a", "b"},
-		v2:      &Tree{Value: "a"},
-		message: "eq ([]interface{} => string) should return true when v2 are in v1",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      []interface{}{"a", "b"},
-		v2:      &Tree{Value: "c"},
-		message: "eq ([]interface{} => string) should return false when v2 are not in v1",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "a",
-		v2:      &Tree{Value: []interface{}{1, 2}},
-		message: "eq (TreeValue []interface{} => int) without string in the tree value should return nil",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "a",
-		v2:      &Tree{Value: []interface{}{"1", "2"}},
-		message: "eq (TreeValue []interface{} => string) not finding string should return nil",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "a",
-		v2:      &Tree{Value: []interface{}{"a", "b"}},
-		message: "eq (TreeValue []interface{} => string) finding string should return The node",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v1:      1.0,
-		v2:      &Tree{Value: []interface{}{1, 2}},
-		message: "eq (TreeValue []interface{} => int) without float64 in the tree value should return nil",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      1.0,
-		v2:      &Tree{Value: []interface{}{3.0, 4.0}},
-		message: "eq (TreeValue []interface{} => float64) not finding float64 should return nil",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      1.0,
-		v2:      &Tree{Value: []interface{}{1.0, 2.0}},
-		message: "eq (TreeValue []interface{} => float64) finding float64 should return The node",
-		result:  true,
-		err:     nil,
-	},
-}
-
-// TestEq test Equal feature
-func TestEq(t *testing.T) {
-	for _, tt := range eqtt {
-		// Act
-		result, err := eq(tt.v1, tt.v2)
-
-		// Assert
-		assert.Equal(t, tt.err, err, tt.message)
-		assert.Equal(t, tt.result, (result != nil), tt.message)
-	}
-}
-
-var comparett = []struct {
-	op      string
-	v2      *Tree
-	err     error
-	result  bool
-	message string
-}{
-	{
-		v2:      &Tree{Value: "fallback"},
-		message: "Compare should always return true, when it is the fallback node",
-		result:  true,
-		err:     nil,
-	},
-	{
-		v2:      &Tree{Value: 123, Operator: "abc"},
-		message: "Compare should always return false, when the operator is not supported",
-		result:  false,
-		err:     ErrOperator,
-	},
-}
-
-// TestCompare test the Compare function
-func TestCompare(t *testing.T) {
-	for _, tt := range comparett {
-		// Act
-		result, err := compare(nil, nil, tt.v2, nil)
-
-		// Assert
-		assert.Equal(t, tt.err, err, tt.message)
-		assert.Equal(t, tt.result, (result != nil), tt.message)
-	}
-}
-
-var regexptt = []struct {
-	v1     interface{}
-	v2     *Tree
-	err    error
-	result bool
-
-	message string
-}{
-	{
-		v1:      123,
-		message: "Contains should not support others type than string as request",
-		result:  false,
-		err:     ErrNotSupportedType,
-	},
-	{
-		v1:      "123",
-		v2:      &Tree{Value: 123},
-		message: "Contains should not support others type than string as Tree Value",
-		result:  false,
-		err:     ErrBadType,
-	},
-	{
-		v1:      "abcdefghijkl",
-		v2:      &Tree{Value: "[0-9]+"},
-		message: "Contains should return false if v1 does not match v2",
-		result:  false,
-		err:     nil,
-	},
-	{
-		v1:      "abcdefgh45jkl",
-		v2:      &Tree{Value: "[0-9]+"},
-		message: "Contains should return true if v1 contains v2",
-		result:  true,
-		err:     nil,
-	},
-}
-
-// TestRegex test regular expression feature
-func TestRegex(t *testing.T) {
-	for _, tt := range containstt {
-		// Act
-		result, err := regex(tt.v1, tt.v2)
-
-		// Assert
-		assert.Equal(t, tt.err, err, tt.message)
-		assert.Equal(t, tt.result, (result != nil), tt.message)
+func TestComparator(t *testing.T) {
+	for _, tt := range tts {
+		for wantKey, want := range tt.want {
+			t.Run(fmt.Sprintf("%s+%s", tt.name, wantKey), func(t *testing.T) {
+				var (
+					got *Tree
+					err error
+				)
+				switch wantKey {
+				case "eq":
+					got, err = eq(tt.v1, tt.v2)
+				case "gt":
+					got, err = gt(tt.v1, tt.v2)
+				case "gte":
+					got, err = gte(tt.v1, tt.v2)
+				case "lt":
+					got, err = lt(tt.v1, tt.v2)
+				case "lte":
+					got, err = lte(tt.v1, tt.v2)
+				case "compare":
+					got, err = compare(nil, nil, tt.v2, nil)
+				case "regex":
+					got, err = regex(tt.v1, tt.v2)
+				case "contains":
+					got, err = contains(tt.v1, tt.v2)
+				case "count":
+					got, err = count(tt.v1, tt.v2)
+				default:
+					t.Logf("No matching test for key %q", wantKey)
+				}
+				assert.Equal(t, want.err, err)
+				assert.Equal(t, want.result, (got != nil))
+			})
+		}
 	}
 }
 
@@ -780,7 +847,7 @@ func TestPercentage_With_FallBack_Should_Return_Fallback(t *testing.T) {
 
 	//Assert
 	assert.NoError(t, err, "percentage should not return an error, if fallback is defined")
-	assert.Equal(t, rootTree.GetChild()[1], result, "percentage should return falback, if fallback is defined, and there is no others choice")
+	assert.Equal(t, rootTree.GetChild()[1], result, "percentage should return fallback, if fallback is defined, and there is no others choice")
 }
 
 // TestPercentage_Should_Return_A_Node should return a node, if all is ok
@@ -872,7 +939,7 @@ func TestAbTest_With_FallBack_Should_Return_Fallback(t *testing.T) {
 
 	//Assert
 	assert.NoError(t, err, "A/B Test should not return an error, if fallback is defined")
-	assert.Equal(t, rootTree.GetChild()[1], result, "A/B Test should return falback, if fallback is defined, and there is no others choice")
+	assert.Equal(t, rootTree.GetChild()[1], result, "A/B Test should return fallback, if fallback is defined, and there is no others choice")
 }
 
 // TestAbTest_Should_Return_A_Node should return a node, if all is ok

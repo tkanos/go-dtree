@@ -13,11 +13,11 @@ func init() {
 	rand.Seed(int64(time.Now().Nanosecond()))
 }
 
-// FallbackType the fallback value (by default = "fallback"), can be overrided
+// FallbackType the fallback value (by default = "fallback"), can be override
 var FallbackType = "fallback"
 
-// ErrOperator : unknow operator
-var ErrOperator = errors.New("unknow operator")
+// ErrOperator : unknown operator
+var ErrOperator = errors.New("unknown operator")
 
 // ErrBadType : Types between request and Tree are different, so we are unable to compare them
 var ErrBadType = errors.New("types are different")
@@ -42,7 +42,7 @@ func compare(requests map[string]interface{}, jsonValue interface{}, node *Tree,
 		return node, nil
 	}
 
-	// if the operators override an existing one defined on isExistingOperator, we check first the opeators else we do it in the default
+	// if the operators override an existing one defined on isExistingOperator, we check first the operators else we do it in the default
 	if config != nil && config.OverrideExistingOperator {
 		if r, err := runOperators(requests, node, config); err != ErrOperator {
 			return r, err
@@ -106,9 +106,47 @@ func isExistingOperator(name string) bool {
 	}
 }
 
-// eq check if v1 == v2 (only for string, float64, bool, []interface{} (interface{} being a string or float64))
+// eq check if v1 == v2 for string, int, int64, float64, bool, []interface{} (interface{} being a string, int, int64 and float64))
 func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 	switch t1 := v1.(type) {
+	case int:
+		switch t2 := v2.Value.(type) {
+		case int:
+			if t1 == t2 {
+				return v2, nil
+			}
+			return nil, nil
+		case []interface{}:
+			for _, v := range t2 {
+				if t2, ok := v.(int); ok {
+					if t1 == t2 {
+						return v2, nil
+					}
+				}
+			}
+			return nil, nil
+		default:
+			return nil, ErrBadType
+		}
+	case int64:
+		switch t2 := v2.Value.(type) {
+		case int64:
+			if t1 == t2 {
+				return v2, nil
+			}
+			return nil, nil
+		case []interface{}:
+			for _, v := range t2 {
+				if t2, ok := v.(int64); ok {
+					if t1 == t2 {
+						return v2, nil
+					}
+				}
+			}
+			return nil, nil
+		default:
+			return nil, ErrBadType
+		}
 	case float64:
 		switch t2 := v2.Value.(type) {
 		case float64:
@@ -159,6 +197,36 @@ func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 	case []interface{}:
 		for _, v := range v1.([]interface{}) {
 			switch tv := v.(type) {
+			case int:
+				if t2, ok := v2.Value.(int); ok {
+					if tv == t2 {
+						return v2, nil
+					}
+				}
+				if t2, ok := v2.Value.([]interface{}); ok {
+					for _, vs := range t2 {
+						if t2, ok := vs.(int); ok {
+							if tv == t2 {
+								return v2, nil
+							}
+						}
+					}
+				}
+			case int64:
+				if t2, ok := v2.Value.(int64); ok {
+					if tv == t2 {
+						return v2, nil
+					}
+				}
+				if t2, ok := v2.Value.([]interface{}); ok {
+					for _, vs := range t2 {
+						if t2, ok := vs.(int64); ok {
+							if tv == t2 {
+								return v2, nil
+							}
+						}
+					}
+				}
 			case float64:
 				if t2, ok := v2.Value.(float64); ok {
 					if tv == t2 {
@@ -216,14 +284,54 @@ func eq(v1 interface{}, v2 *Tree) (*Tree, error) {
 			}
 		}
 		return nil, nil
+	case []int64:
+		for _, v := range v1.([]interface{}) {
+			switch tv := v.(type) {
+			case int64:
+				if t2, ok := v2.Value.(int64); ok {
+					if tv == t2 {
+						return v2, nil
+					}
+				}
+			}
+		}
+		return nil, nil
+	case []int:
+		for _, v := range v1.([]interface{}) {
+			switch tv := v.(type) {
+			case int:
+				if t2, ok := v2.Value.(int); ok {
+					if tv == t2 {
+						return v2, nil
+					}
+				}
+			}
+		}
+		return nil, nil
 	default:
 		return nil, ErrNotSupportedType
 	}
 }
 
-// gt check if v1 > v2 (only for float64 and string)
+// gt check if v1 > v2 (only for int, int64, float64 and string)
 func gt(v1 interface{}, v2 *Tree) (*Tree, error) {
 	switch t1 := v1.(type) {
+	case int:
+		if t2, ok := v2.Value.(int); ok {
+			if t1 > t2 {
+				return v2, nil
+			}
+			return nil, nil
+		}
+		return nil, ErrBadType
+	case int64:
+		if t2, ok := v2.Value.(int64); ok {
+			if t1 > t2 {
+				return v2, nil
+			}
+			return nil, nil
+		}
+		return nil, ErrBadType
 	case float64:
 		if t2, ok := v2.Value.(float64); ok {
 			if t1 > t2 {
@@ -249,9 +357,25 @@ func gt(v1 interface{}, v2 *Tree) (*Tree, error) {
 	}
 }
 
-// lt check if v1 < v2 (only for float64 and string)
+// lt check if v1 < v2 (only for int, int64, float64 and string)
 func lt(v1 interface{}, v2 *Tree) (*Tree, error) {
 	switch t1 := v1.(type) {
+	case int:
+		if t2, ok := v2.Value.(int); ok {
+			if t1 < t2 {
+				return v2, nil
+			}
+			return nil, nil
+		}
+		return nil, ErrBadType
+	case int64:
+		if t2, ok := v2.Value.(int64); ok {
+			if t1 < t2 {
+				return v2, nil
+			}
+			return nil, nil
+		}
+		return nil, ErrBadType
 	case float64:
 		if t2, ok := v2.Value.(float64); ok {
 			if t1 < t2 {
@@ -277,9 +401,29 @@ func lt(v1 interface{}, v2 *Tree) (*Tree, error) {
 	}
 }
 
-// gte check if v1 >= v2 (only for float64 and string)
+// gte check if v1 >= v2 (only for int, int64, float64 and string)
 func gte(v1 interface{}, v2 *Tree) (*Tree, error) {
 	switch t1 := v1.(type) {
+	case int:
+		if t2, ok := v2.Value.(int); ok {
+			if t1 >= t2 {
+				return v2, nil
+			}
+
+			return nil, nil
+		}
+
+		return nil, ErrBadType
+	case int64:
+		if t2, ok := v2.Value.(int64); ok {
+			if t1 >= t2 {
+				return v2, nil
+			}
+
+			return nil, nil
+		}
+
+		return nil, ErrBadType
 	case float64:
 		if t2, ok := v2.Value.(float64); ok {
 			if t1 >= t2 {
@@ -305,9 +449,29 @@ func gte(v1 interface{}, v2 *Tree) (*Tree, error) {
 	}
 }
 
-// lte check if v1 <= v2 (only for float64 and string)
+// lte check if v1 <= v2 (only for int, int64, float64 and string)
 func lte(v1 interface{}, v2 *Tree) (*Tree, error) {
 	switch t1 := v1.(type) {
+	case int:
+		if t2, ok := v2.Value.(int); ok {
+			if t1 <= t2 {
+				return v2, nil
+			}
+
+			return nil, nil
+		}
+
+		return nil, ErrBadType
+	case int64:
+		if t2, ok := v2.Value.(int64); ok {
+			if t1 <= t2 {
+				return v2, nil
+			}
+
+			return nil, nil
+		}
+
+		return nil, ErrBadType
 	case float64:
 		if t2, ok := v2.Value.(float64); ok {
 			if t1 <= t2 {
@@ -353,15 +517,33 @@ func contains(v1 interface{}, v2 *Tree) (*Tree, error) {
 // count check if the length of a slice v1 == (int)v2
 func count(v1 interface{}, v2 *Tree) (*Tree, error) {
 	switch t1 := v1.(type) {
-	case []interface{}:
+	case []float64:
 		if t2, ok := v2.Value.(float64); ok {
 			if len(t1) == int(t2) {
 				return v2, nil
 			}
 			return nil, nil
 		}
-
 		return nil, ErrBadType
+
+	case []int64:
+		if t2, ok := v2.Value.(int64); ok {
+			if len(t1) == int(t2) {
+				return v2, nil
+			}
+			return nil, nil
+		}
+		return nil, ErrBadType
+
+	case []int:
+		if t2, ok := v2.Value.(int); ok {
+			if len(t1) == int(t2) {
+				return v2, nil
+			}
+			return nil, nil
+		}
+		return nil, ErrBadType
+
 	default:
 		return nil, ErrNotSupportedType
 	}

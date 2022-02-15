@@ -30,15 +30,16 @@ type Tree struct {
 
 	ctx context.Context
 
-	ID       int                    `json:"id"`
-	Name     string                 `json:"name"`
-	ParentID int                    `json:"parent_id"`
-	Value    interface{}            `json:"value"`
-	Operator string                 `json:"operator"`
-	Key      string                 `json:"key"`
-	Order    int                    `json:"order"`
-	Content  interface{}            `json:"content"`
-	Headers  map[string]interface{} `json:"headers"`
+	ID       int                      `json:"id"`
+	Name     string                   `json:"name"`
+	ParentID int                      `json:"parent_id"`
+	Value    interface{}              `json:"value"`
+	Operator string                   `json:"operator"`
+	Key      string                   `json:"key"`
+	Order    int                      `json:"order"`
+	Content  interface{}              `json:"content"`
+	Headers  map[string]interface{}   `json:"headers"`
+	Legacy   map[string][]interface{} `json:"legacy"`
 }
 
 type byOrder []*Tree
@@ -65,6 +66,17 @@ func (o byOrder) Less(i, j int) bool {
 // AddNode Add a new Node (leaf) to the Tree
 func (t *Tree) AddNode(node *Tree) {
 	node.parent = t
+
+	for parentLegacyKey, parentLegacyValue := range t.Legacy {
+		if _, ok := node.Legacy[parentLegacyKey]; ok {
+			for _, legacyValue := range parentLegacyValue {
+				node.Legacy[parentLegacyKey] = append(node.Legacy[parentLegacyKey], legacyValue)
+			}
+		} else {
+			node.Legacy[parentLegacyKey] = parentLegacyValue
+		}
+	}
+
 	t.nodes = append(t.nodes, node)
 	sort.Sort(byOrder(t.nodes))
 }
@@ -136,6 +148,7 @@ func LoadTree(jsonTree []byte) (*Tree, error) {
 func CreateTree(data []Tree) *Tree {
 	temp := make(map[int]*Tree)
 	var root *Tree
+
 	for i := range data {
 		leaf := &data[i]
 		temp[leaf.ID] = leaf
