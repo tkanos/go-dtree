@@ -73,6 +73,7 @@ func (t *Tree) AddNode(node *Tree) {
 				node.Legacy[parentLegacyKey] = append(node.Legacy[parentLegacyKey], legacyValue)
 			}
 		} else {
+			node.Legacy = map[string][]interface{}{}
 			node.Legacy[parentLegacyKey] = parentLegacyValue
 		}
 	}
